@@ -17,7 +17,7 @@ from aihwkit.nn.modules.base import AnalogModuleBase, RPUConfigAlias
 from aihwkit.simulator.configs import SingleRPUConfig
 
 
-class AnalogRNN(Module):
+class AnalogRNN(AnalogSequential):
     """RNN layer that uses an analog tile.
 
     Args:
@@ -80,11 +80,9 @@ class AnalogRNN(Module):
         in_features = input_size + hidden_size
         out_features = hidden_size
 
-        self.rnn = AnalogSequential(
-            AnalogLinear(in_features, out_features, bias, rpu_config,
-                         realistic_read_write, weight_scaling_omega),
-            activation
-        )
+        self.recursive_linear = AnalogLinear(in_features, out_features, bias, rpu_config,
+                                             realistic_read_write, weight_scaling_omega)
+        self.activation = activation
 
     @classmethod
     def from_digital(
@@ -108,12 +106,12 @@ class AnalogRNN(Module):
         weight = torch.cat((module.weight_ih_l0, module.weight_hh_l0), dim=1)
         bias = torch.add(module.bias_ih_l0, module.bias_hh_l0)
 
-        analog_module.rnn._apply_to_analog(lambda m: m.set_weights(weight, bias))
+        analog_module.recursive_linear.set_weights(weight, bias)
         return analog_module
 
     def reset_parameters(self) -> None:
         """Reset the parameters (weight and bias)."""
-        self.rnn._apply_to_analog(lambda m: m.reset_parameters())
+        self.recursive_linear.reset_parameters()
 
     def forward(self, inputs: Tensor):
         """Compute the forward pass."""
@@ -131,6 +129,6 @@ class AnalogRNN(Module):
         
         for input in inputs: # iterate through sequence
             x_input = torch.cat((input, hx), dim=1)
-            hx = self.rnn(x_input)
+            hx = self.activation(self.recursive_linear(x_input))
         
         return hx

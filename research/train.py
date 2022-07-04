@@ -93,7 +93,6 @@ model = DND(
     output_size=OUTPUT_SIZE,
     hidden_size=HIDDEN_SIZE,
     num_layers=NUM_LAYERS,
-    id=ID
 ).to(device)
 
 # loss function
@@ -117,7 +116,7 @@ if __name__ == '__main__':
     time = datetime.now()
     # save model
     torch.save(model.state_dict(),
-            f'research/saves/{model.id}-{time}.pth')
+            f'research/saves/{ID}-{time}.pth')
     # save training parameters
-    with open(f'research/saves/{model.id}-{time}.json', 'w') as file:
+    with open(f'research/saves/{ID}-{time}.json', 'w') as file:
         file.write(json.dumps(trainer.training_state_dict()))

@@ -25,7 +25,6 @@ from aihwkit.nn import (
     AnalogLinear, AnalogConv1d, AnalogConv2d, AnalogConv3d, AnalogRNN,
     AnalogLinearMapped, AnalogConv1dMapped, AnalogConv2dMapped, AnalogConv3dMapped, AnalogSequential
 )
-from models import DND, MDND
 
 RPUConfigGeneric = TypeVar('RPUConfigGeneric')
 
@@ -34,7 +33,6 @@ _DEFAULT_CONVERSION_MAP = {Linear: AnalogLinear,
                            Conv2d: AnalogConv2d,
                            Conv3d: AnalogConv3d,
                            RNN: AnalogRNN,
-                           DND: MDND,
                            Sequential: AnalogSequential}
 
 _DEFAULT_MAPPED_CONVERSION_MAP = {Linear: AnalogLinearMapped,

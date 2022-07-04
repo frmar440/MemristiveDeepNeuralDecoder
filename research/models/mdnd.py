@@ -7,23 +7,12 @@ from aihwkit.nn import AnalogRNN, AnalogLinear, AnalogSequential
 from aihwkit.nn.modules.base import RPUConfigAlias
 
 
-class MDND(Sequential):
+class MDND(AnalogSequential):
     """"Memristive deep neural decoder.
+
+    Do not instantiate this class explicitly, call get_mdnd().
     """
 
-    @classmethod
-    def from_digital(cls, module,  # pylint: disable=unused-argument
-                     *args: Any,
-                     **kwargs: Any) -> 'MDND':
-        """Construct MDND in-place from DND."""
-        return cls(OrderedDict(mod for mod in module.named_children()))
-    
-    def forward(self, inputs):  # pylint: disable=arguments-differ
-        """Forward pass """
-        rnn, linear = self
-        hx = rnn(inputs)
-        logits = linear(hx)
-        return logits
 
 def get_mdnd(
         input_size: int,
@@ -37,9 +26,10 @@ def get_mdnd(
         bidirectional: bool = False,
         rpu_config: Optional[RPUConfigAlias] = None,
         realistic_read_write: bool = False,
-        weight_scaling_omega: Optional[float] = None,
-        id: str = None
+        weight_scaling_omega: Optional[float] = None
     ) -> MDND:
+    """Get memristive deep neural decoder."""
+
     rnn = AnalogRNN(input_size, hidden_size, num_layers, nonlinearity,
                     bias, batch_first, dropout, bidirectional, rpu_config,
                     realistic_read_write, weight_scaling_omega)
