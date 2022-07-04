@@ -94,7 +94,7 @@ class Trainer(Tester):
             self.training_loop(model)
             self.test_loop(model)
             time_now = time() - time_init
-            print(f"Time: {time_now:>8f} s\n")
+            print(f"Time: {time_now:>4f} s\n")
         print("Done!")
     
 

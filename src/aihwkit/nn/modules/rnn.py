@@ -111,7 +111,6 @@ class AnalogRNN(Module):
         analog_module.rnn._apply_to_analog(lambda m: m.set_weights(weight, bias))
         return analog_module
 
-
     def reset_parameters(self) -> None:
         """Reset the parameters (weight and bias)."""
         self.rnn._apply_to_analog(lambda m: m.reset_parameters())

@@ -19,12 +19,13 @@ model containing analog layers.
 from typing import TypeVar, Optional, Dict
 import copy
 
-from torch.nn import Module, Linear, Conv1d, Conv2d, Conv3d, Sequential
+from torch.nn import Module, Linear, Conv1d, Conv2d, Conv3d, Sequential, RNN
 
 from aihwkit.nn import (
-    AnalogLinear, AnalogConv1d, AnalogConv2d, AnalogConv3d,
+    AnalogLinear, AnalogConv1d, AnalogConv2d, AnalogConv3d, AnalogRNN,
     AnalogLinearMapped, AnalogConv1dMapped, AnalogConv2dMapped, AnalogConv3dMapped, AnalogSequential
 )
+from models import DND, MDND
 
 RPUConfigGeneric = TypeVar('RPUConfigGeneric')
 
@@ -32,6 +33,8 @@ _DEFAULT_CONVERSION_MAP = {Linear: AnalogLinear,
                            Conv1d: AnalogConv1d,
                            Conv2d: AnalogConv2d,
                            Conv3d: AnalogConv3d,
+                           RNN: AnalogRNN,
+                           DND: MDND,
                            Sequential: AnalogSequential}
 
 _DEFAULT_MAPPED_CONVERSION_MAP = {Linear: AnalogLinearMapped,
