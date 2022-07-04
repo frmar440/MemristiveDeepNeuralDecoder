@@ -1,20 +1,12 @@
 """ Recurrent layers."""
-
-import math
-import warnings
-import numbers
-from typing import List, Tuple, Optional, overload
+from typing import Optional
 
 import torch
-from torch import nn
 from torch import Tensor
-from torch.nn import Module
-from torch.nn.modules.rnn import RNNBase, RNN
+from torch.nn import RNN, Tanh, ReLU
 
-from aihwkit.nn import AnalogSequential
-from aihwkit.nn import AnalogLinear
-from aihwkit.nn.modules.base import AnalogModuleBase, RPUConfigAlias
-from aihwkit.simulator.configs import SingleRPUConfig
+from aihwkit.nn import AnalogLinear, AnalogSequential
+from aihwkit.nn.modules.base import RPUConfigAlias
 
 
 class AnalogRNN(AnalogSequential):
@@ -68,9 +60,9 @@ class AnalogRNN(AnalogSequential):
             raise ValueError('Bidirectional RNN is not supported')
 
         if nonlinearity == 'tanh':
-            activation = nn.Tanh()
+            activation = Tanh()
         elif nonlinearity == 'relu':
-            activation = nn.ReLU()
+            activation = ReLU()
         else:
             raise ValueError("Unknown nonlinearity '{}'".format(self.nonlinearity))
 
