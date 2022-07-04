@@ -1,6 +1,6 @@
 """Define memristive deep neural decoders.
 """
-from typing import Optional
+from typing import Optional, Any, OrderedDict
 
 from torch import Tensor
 from aihwkit.nn import AnalogRNN, AnalogLinear, AnalogSequential
@@ -60,6 +60,19 @@ class MDND(AnalogSequential):
                    realistic_read_write, weight_scaling_omega)
         self.linear = AnalogLinear(hidden_size, output_size, bias, rpu_config,
                             realistic_read_write, weight_scaling_omega)
+
+    @classmethod
+    def from_digital(cls, module,  # pylint: disable=unused-argument
+                     *args: Any,
+                     **kwargs: Any) -> 'MDND':
+        """Construct MDND in-place from DND."""
+        analog_module = cls(module.rnn.input_size,
+                            module.rnn.hidden_size,
+                            module.linear.out_features)
+        
+        analog_module._modules = module._modules
+
+        return analog_module
 
     def forward(self, inputs: Tensor):
         """Compute the forward pass."""

@@ -15,6 +15,7 @@ class DND(Module):
             num_layers (int, optional): number of recurrent layers. Defaults to 1.
         """
         super().__init__()
+        
         self.rnn = RNN(input_size, hidden_size, num_layers, nonlinearity='relu')
         self.linear = Linear(hidden_size, output_size)
 
