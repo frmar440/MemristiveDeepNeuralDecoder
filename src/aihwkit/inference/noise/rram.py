@@ -126,8 +126,9 @@ class RRAMLikeNoiseModel(BaseNoiseModel):
     def generate_drift_coefficients(self, g_target: Tensor) -> Tensor:
         """Return drift coefficients ``nu`` based on RRAM measurements.
         
-        Not implemented for RRAM yet. Values are incorrect.
+        Not implemented yet.
         """
+        # TODO: drift coefficients
         g_relative = clamp(torch_abs(g_target / self.g_max), min=_ZERO_CLIP)
 
         # gt should be normalized wrt g_max
@@ -144,23 +145,28 @@ class RRAMLikeNoiseModel(BaseNoiseModel):
             nu_drift: Tensor,
             t_inference: float
     ) -> Tensor:
-        """Apply the noise and drift up to the assumed inference time
-        point based on RRAM measurements."""
-        t = t_inference + self.t_0
+        """Apply the noise to the assumed inference time
+        point based on RRAM measurements.
+        
+        Not implemented yet.
+        """
+        # TODO: 1/f noise
+        # t = t_inference + self.t_0
 
-        # drift (disabled since generate_drift_coefficients is not implemented)
+        # drift (not implemented for RRAM yet)
         # if t > self.t_0:
         #     g_drift = g_prog * ((t / self.t_0) ** (- nu_drift))
         # else:
         #     g_drift = g_prog
 
-        # apply reading noise to conductance (need to be updated to 1/f noise)
-        mat = 1
-        sig_read = self.read_coeff[0]
-        for coeff in self.read_coeff[1:]:
-            mat *= g_prog / self.g_max
-            sig_read += mat * coeff
+        # expected accumulated 1/f noise since start of programming at t=0
+        # if t > 0:
+        #     q_s = (0.0088 / ((torch_abs(g_prog) /
+        #                       self.g_max) ** 0.65).clamp(min=1e-3)).clamp(max=0.2)
+        #     sig_noise = q_s * sqrt(numpy_log((t + self.t_read) / (2 * self.t_read)))
+        #     g_final = g_drift + torch_abs(g_drift) * self.read_noise_scale \
+        #         * sig_noise * randn_like(g_prog)
+        # else:
+        g_final = g_prog
 
-        g_final = g_prog + self.read_noise_scale * sig_read * randn_like(g_prog)
-
-        return g_final.clamp(min=0.0) # no negative conductances allowed
+        return g_final.clamp(min=0.0)
