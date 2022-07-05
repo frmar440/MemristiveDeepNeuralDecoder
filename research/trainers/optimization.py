@@ -4,7 +4,7 @@ from time import time
 
 import torch
 from torch.utils.data import DataLoader
-
+from aihwkit.nn import AnalogSequential
 
 class Tester:
     """Implementation of test loop.
@@ -44,9 +44,14 @@ class Tester:
         model.eval()
         # disable gradient tracking (forward pass)
         with torch.no_grad():
-            for X, y in self.test_dataloader:
+            for X, y in self.test_dataloader: # batch_first in DataLoader
                 if not self.batch_first:
                     X = torch.transpose(X, 0, 1) # swap batch_size and sequence_length
+
+                if isinstance(model, AnalogSequential):
+                    # program and drift all analog inference layers
+                    model.drift_analog_weights()
+
                 pred = model(X)
                 test_loss += self.loss_fn(pred, y).item()
                 correct += (pred.argmax(1) == y.argmax(1)).type(torch.float).sum().item()
@@ -117,7 +122,7 @@ class Trainer(Tester):
         size = len(self.training_dataloader.dataset)
 
         model.train()
-        for batch, (X, y) in enumerate(self.training_dataloader):
+        for batch, (X, y) in enumerate(self.training_dataloader): # batch_first in DataLoader
             # Compute prediction and loss
             batch_size = len(X)
             if not self.batch_first:
