@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
+import pickle
+import pandas as pd
 
 mpl.rcParams['axes.labelsize'] = 12
 
@@ -41,5 +43,5 @@ def sig_read():
     plt.savefig('research/plots/sig_read.pdf')
 
 
-# sig_prog()
-sig_read()
+def dac_adc_resolution():
+
