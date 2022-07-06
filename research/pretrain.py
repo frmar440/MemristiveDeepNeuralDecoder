@@ -39,22 +39,22 @@ DATA_PATHS = [
 ]
 IDS_DND = [
     'fp_trained_dnd_model_d3_p0015_nU16_nR3',
-    'fp_trained_dnd_model_d3_p0035_nU16_nR3'
-    'fp_trained_dnd_model_d3_p005_nU16_nR3'
-    'fp_trained_dnd_model_d3_p006_nU16_nR3'
-    'fp_trained_dnd_model_d3_p0065_nU16_nR3'
-    'fp_trained_dnd_model_d3_p007_nU16_nR3'
-    'fp_trained_dnd_model_d3_p0085_nU16_nR3'
+    'fp_trained_dnd_model_d3_p0035_nU16_nR3',
+    'fp_trained_dnd_model_d3_p005_nU16_nR3',
+    'fp_trained_dnd_model_d3_p006_nU16_nR3',
+    'fp_trained_dnd_model_d3_p0065_nU16_nR3',
+    'fp_trained_dnd_model_d3_p007_nU16_nR3',
+    'fp_trained_dnd_model_d3_p0085_nU16_nR3',
     'fp_trained_dnd_model_d3_p01_nU16_nR3'
 ]
 IDS_MDND = [
     'fp_trained_mdnd_model_d3_p0015_nU16_nR3',
-    'fp_trained_mdnd_model_d3_p0035_nU16_nR3'
-    'fp_trained_mdnd_model_d3_p005_nU16_nR3'
-    'fp_trained_mdnd_model_d3_p006_nU16_nR3'
-    'fp_trained_mdnd_model_d3_p0065_nU16_nR3'
-    'fp_trained_mdnd_model_d3_p007_nU16_nR3'
-    'fp_trained_mdnd_model_d3_p0085_nU16_nR3'
+    'fp_trained_mdnd_model_d3_p0035_nU16_nR3',
+    'fp_trained_mdnd_model_d3_p005_nU16_nR3',
+    'fp_trained_mdnd_model_d3_p006_nU16_nR3',
+    'fp_trained_mdnd_model_d3_p0065_nU16_nR3',
+    'fp_trained_mdnd_model_d3_p007_nU16_nR3',
+    'fp_trained_mdnd_model_d3_p0085_nU16_nR3',
     'fp_trained_mdnd_model_d3_p01_nU16_nR3'
 ]
 
