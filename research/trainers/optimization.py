@@ -49,7 +49,8 @@ class Tester:
                     X = torch.transpose(X, 0, 1) # swap batch_size and sequence_length
 
                 if isinstance(model, AnalogSequential):
-                    # program and drift all analog inference layers
+                    # noise injection
+                    model.program_analog_weights()
                     model.drift_analog_weights()
 
                 pred = model(X)
@@ -121,12 +122,19 @@ class Trainer(Tester):
         """
         size = len(self.training_dataloader.dataset)
 
-        model.train()
         for batch, (X, y) in enumerate(self.training_dataloader): # batch_first in DataLoader
             # Compute prediction and loss
             batch_size = len(X)
             if not self.batch_first:
                 X = torch.transpose(X, 0, 1) # swap batch_size and sequence_length
+
+            if isinstance(model, AnalogSequential):
+                    model.eval()
+                    # noise injection
+                    model.program_analog_weights()
+                    model.drift_analog_weights()
+            
+            model.train()
             pred = model(X)
             loss = self.loss_fn(pred, y)
 

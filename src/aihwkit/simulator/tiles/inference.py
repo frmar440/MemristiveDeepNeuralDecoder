@@ -167,7 +167,6 @@ class InferenceTile(AnalogTile):
         from aihwkit.simulator.configs.helpers import parameters_to_bindings
         from aihwkit.simulator.configs.utils import WeightModifierType
 
-        # inference and training modifier
         if (self.rpu_config.modifier.type != WeightModifierType.COPY or
             self.rpu_config.modifier.pdrop > 0.0):
             weight_modify_params = parameters_to_bindings(self.rpu_config.modifier)

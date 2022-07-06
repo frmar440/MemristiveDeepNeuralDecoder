@@ -75,17 +75,6 @@ class MDND(AnalogSequential):
 
         return analog_module
 
-    def load_rpu_config(self, rpu_config: Optional[RPUConfigAlias] = None):
-        """Load resistive processing unit configuration"""
-        def foo(m):
-            if m.analog_tile.rpu_config.__class__ != rpu_config.__class__:
-                raise ModuleError("RPU config mismatch during loading: "
-                                  "Tried to replace "
-                                  f"{m.analog_tile.rpu_config.__class__.__name__} "
-                                  f"with {rpu_config.__class__.__name__}")
-            m.analog_tile.rpu_config = rpu_config
-        self._apply_to_analog(foo)
-
     def forward(self, inputs: Tensor):
         """Compute the forward pass."""
         hx = self.rnn(inputs)
