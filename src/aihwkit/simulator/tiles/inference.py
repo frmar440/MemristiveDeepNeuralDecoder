@@ -167,12 +167,17 @@ class InferenceTile(AnalogTile):
         from aihwkit.simulator.configs.helpers import parameters_to_bindings
         from aihwkit.simulator.configs.utils import WeightModifierType
 
+        # not is_test removed
         if (self.rpu_config.modifier.type != WeightModifierType.COPY or
             self.rpu_config.modifier.pdrop > 0.0):
             weight_modify_params = parameters_to_bindings(self.rpu_config.modifier)
             self.tile.modify_weights(weight_modify_params)
 
-        return super().forward(x_input, False)
+        if not is_test or self.drift_compensation is None:
+            return super().forward(x_input, is_test)
+
+        # only do drift compensation in eval mode
+        return super().forward(x_input, True)*self.alpha
 
     @no_grad()
     def post_update_step(self) -> None:

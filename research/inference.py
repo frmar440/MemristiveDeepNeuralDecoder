@@ -50,17 +50,13 @@ rpu_config.mapping = MappingParameter(digital_bias=False, # bias term is handled
                                       max_output_size=512)
 rpu_config.forward.inp_res = 1/256.  # 8-bit DAC discretization.
 rpu_config.forward.out_res = 1/256.  # 8-bit ADC discretization.
-rpu_config.forward.w_noise_type = WeightNoiseType.ADDITIVE_CONSTANT
-rpu_config.forward.w_noise = 0.0
 
 # training
 rpu_config.clip = WeightClipParameter(sigma=2.5, type=WeightClipType.LAYER_GAUSSIAN)
 # inference
 rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=66.0, prog_noise_scale=1.) # rram noise
-# training and inference
-rpu_config.modifier = WeightModifierParameter(pdrop=0.1) # defective device probability
-# rpu_config.modifier.type = WeightModifierType.ADD_NORMAL
-# rpu_config.modifier.std_dev = 0.0
+rpu_config.modifier = WeightModifierParameter(pdrop=0.0, # defective device probability
+                                              enable_during_test=True)
 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -85,4 +81,4 @@ analog_model = MDND(
 # load weights (but use the current RPU config)
 analog_model.load_state_dict(torch.load(LOAD_PATH), load_rpu_config=False)
 # inference
-tester(analog_model)
+tester(analog_model, inference=True)

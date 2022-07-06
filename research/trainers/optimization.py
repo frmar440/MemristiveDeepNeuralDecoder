@@ -26,15 +26,14 @@ class Tester:
         self.loss_fn = loss_fn
         self.batch_first = batch_first
 
-        self.accuracies = []
-        self.average_losses = []
+        self.reset_stats()
     
 
-    def __call__(self, model) -> None:
-        self.test_loop(model)
+    def __call__(self, model, inference=False) -> None:
+        self.test_loop(model, inference)
 
 
-    def test_loop(self, model) -> None:
+    def test_loop(self, model, inference=False) -> None:
         """Iterate over the test dataset to check if model performance is improving.
         """
         size = len(self.test_dataloader.dataset)
@@ -42,16 +41,17 @@ class Tester:
         test_loss, correct = 0, 0
 
         model.eval()
+        # program and drift weights only during inference
+        if inference and isinstance(model, AnalogSequential):
+            model.program_analog_weights()
+            model.drift_analog_weights()
+
         # disable gradient tracking (forward pass)
         with torch.no_grad():
             for X, y in self.test_dataloader: # batch_first in DataLoader
+
                 if not self.batch_first:
                     X = torch.transpose(X, 0, 1) # swap batch_size and sequence_length
-
-                if isinstance(model, AnalogSequential):
-                    # noise injection
-                    model.program_analog_weights()
-                    model.drift_analog_weights()
 
                 pred = model(X)
                 test_loss += self.loss_fn(pred, y).item()
@@ -62,6 +62,11 @@ class Tester:
         self.average_losses.append(test_loss)
         self.accuracies.append(correct)
         print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f}\n")
+    
+    
+    def reset_stats(self):
+        self.accuracies = []
+        self.average_losses = []
 
 
 class Trainer(Tester):
@@ -122,19 +127,14 @@ class Trainer(Tester):
         """
         size = len(self.training_dataloader.dataset)
 
+        model.train()
+
         for batch, (X, y) in enumerate(self.training_dataloader): # batch_first in DataLoader
             # Compute prediction and loss
             batch_size = len(X)
             if not self.batch_first:
                 X = torch.transpose(X, 0, 1) # swap batch_size and sequence_length
 
-            if isinstance(model, AnalogSequential):
-                    model.eval()
-                    # noise injection
-                    model.program_analog_weights()
-                    model.drift_analog_weights()
-            
-            model.train()
             pred = model(X)
             loss = self.loss_fn(pred, y)
 

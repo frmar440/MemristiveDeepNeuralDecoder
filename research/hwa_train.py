@@ -58,11 +58,11 @@ rpu_config.drift_compensation = None
 rpu_config.mapping = MappingParameter(digital_bias=False, # bias term is handled by the analog tile (crossbar)
                                       max_input_size=512,
                                       max_output_size=512)
-rpu_config.forward.inp_res = 1/256.  # 8-bit DAC discretization.
-rpu_config.forward.out_res = 1/256.  # 8-bit ADC discretization.
 # training
 rpu_config.clip = WeightClipParameter(sigma=2.5, type=WeightClipType.LAYER_GAUSSIAN)
 # training and inference
+rpu_config.forward.inp_res = 1/256.  # 8-bit DAC discretization.
+rpu_config.forward.out_res = 1/256.  # 8-bit ADC discretization.
 rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=66.0, prog_noise_scale=1.) # rram noise
 rpu_config.modifier = WeightModifierParameter(pdrop=0.0) # defective device probability
 
