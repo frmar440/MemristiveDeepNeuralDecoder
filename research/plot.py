@@ -4,7 +4,8 @@ import numpy as np
 import pickle
 import pandas as pd
 
-mpl.rcParams['axes.labelsize'] = 12
+# mpl.rcParams['axes.labelsize'] = 12
+mpl.rcParams["errorbar.capsize"] = 1
 
 
 def sig_prog():
@@ -45,3 +46,43 @@ def sig_read():
 
 def dac_adc_resolution():
 
+    se = pd.read_pickle('research/experiments/results/baseline.pkl')
+    df = pd.read_pickle('research/experiments/results/dac_adc_resolution.pkl')
+
+    resolutions = df.index.to_numpy()[1:]
+
+    fig = plt.figure()
+    gs = fig.add_gridspec(2, 2, hspace=0, wspace=0)
+    axs = gs.subplots(sharex='col', sharey='row')
+    
+    axs[0, 0].axhline(se["p0035"]*100, color='k', linestyle='--')
+    axs[0, 0].annotate(f'Baseline: {se["p0035"]*100:>.2f}%\n'+r'$p = 0.35\%$', xy=(15, 80))     
+    axs[0, 0].errorbar(resolutions, df["p0035", "mean"].to_numpy()[1:]*100, yerr=df["p0035", "std"].to_numpy()[1:]*100,
+                 marker='s', color='orange')
+
+    axs[0, 1].axhline(se["p006"]*100, color='k', linestyle='--')
+    axs[0, 1].annotate(f'Baseline: {se["p006"]*100:>.2f}%\n'+r'$p = 0.60\%$', xy=(15, 80))  
+    axs[0, 1].errorbar(resolutions, df["p006", "mean"].to_numpy()[1:]*100, yerr=df["p006", "std"].to_numpy()[1:]*100,
+                 marker='s', color='orange')
+
+    axs[1, 0].axhline(se["p007"]*100, color='k', linestyle='--')
+    axs[1, 0].annotate(f'Baseline: {se["p007"]*100:>.2f}%\n'+r'$p = 0.70\%$', xy=(15, 80))    
+    axs[1, 0].errorbar(resolutions, df["p007", "mean"].to_numpy()[1:]*100, yerr=df["p007", "std"].to_numpy()[1:]*100,
+                 marker='s', color='orange')
+    
+    axs[1, 1].axhline(se["p01"]*100, color='k', linestyle='--')
+    axs[1, 1].annotate(f'Baseline: {se["p01"]*100:>.2f}%\n'+r'$p = 1.00\%$', xy=(15, 80))       
+    axs[1, 1].errorbar(resolutions, df["p01", "mean"].to_numpy()[1:]*100, yerr=df["p01", "std"].to_numpy()[1:]*100,
+                 marker='s', color='orange')
+
+    for ax in axs.flat:
+        ax.tick_params(direction='in', which='both')
+        ax.set_xticks(resolutions)
+        ax.label_outer()
+    
+    fig.supxlabel('DAC/ADC resolution [bit]')
+    fig.supylabel('Decoder test accuracy [%]')
+
+    plt.savefig('research/plots/dac_adc_resolution.pdf')
+
+dac_adc_resolution()
