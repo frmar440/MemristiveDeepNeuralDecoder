@@ -85,4 +85,93 @@ def dac_adc_resolution():
 
     plt.savefig('research/plots/dac_adc_resolution.pdf')
 
-dac_adc_resolution()
+
+def prog_noise_scale():
+
+    se = pd.read_pickle('research/experiments/results/baseline.pkl')
+    df = pd.read_pickle('research/experiments/results/prog_noise_scale.pkl')
+
+    resolutions = df.index.to_numpy()
+
+    fig = plt.figure()
+    gs = fig.add_gridspec(2, 2, hspace=0, wspace=0)
+    axs = gs.subplots(sharex='col', sharey='row')
+    
+    axs[0, 0].axhline(se["p0035"]*100, color='k', linestyle='--')
+    axs[0, 0].annotate(f'Baseline: {se["p0035"]*100:>.2f}%\n'+r'$p = 0.35\%$', xy=(1, 40))
+    mean, std = df["p0035", "mean"].to_numpy()*100, df["p0035", "std"].to_numpy()*100     
+    axs[0, 0].plot(resolutions, mean, color='purple')
+    axs[0, 0].fill_between(resolutions, mean-std, mean+std, facecolor='violet', alpha=0.3)
+
+    axs[0, 1].axhline(se["p006"]*100, color='k', linestyle='--')
+    axs[0, 1].annotate(f'Baseline: {se["p006"]*100:>.2f}%\n'+r'$p = 0.60\%$', xy=(1, 40))  
+    mean, std = df["p006", "mean"].to_numpy()*100, df["p006", "std"].to_numpy()*100     
+    axs[0, 1].plot(resolutions, mean, color='purple')
+    axs[0, 1].fill_between(resolutions, mean-std, mean+std, facecolor='violet', alpha=0.3)
+
+    axs[1, 0].axhline(se["p007"]*100, color='k', linestyle='--')
+    axs[1, 0].annotate(f'Baseline: {se["p007"]*100:>.2f}%\n'+r'$p = 0.70\%$', xy=(1, 40))    
+    mean, std = df["p007", "mean"].to_numpy()*100, df["p007", "std"].to_numpy()*100     
+    axs[1, 0].plot(resolutions, mean, color='purple')
+    axs[1, 0].fill_between(resolutions, mean-std, mean+std, facecolor='violet', alpha=0.3)
+    
+    axs[1, 1].axhline(se["p01"]*100, color='k', linestyle='--')
+    axs[1, 1].annotate(f'Baseline: {se["p01"]*100:>.2f}%\n'+r'$p = 1.00\%$', xy=(1, 40))       
+    mean, std = df["p01", "mean"].to_numpy()*100, df["p01", "std"].to_numpy()*100     
+    axs[1, 1].plot(resolutions, mean, color='purple')
+    axs[1, 1].fill_between(resolutions, mean-std, mean+std, facecolor='violet', alpha=0.3)
+
+    for ax in axs.flat:
+        ax.tick_params(direction='in', which='both')
+        ax.label_outer()
+    
+    fig.supxlabel('Inference noise scale [-]')
+    fig.supylabel('Decoder test accuracy [%]')
+
+    plt.savefig('research/plots/prog_noise_scale.pdf')
+
+def pdrop():
+
+    se = pd.read_pickle('research/experiments/results/baseline.pkl')
+    df = pd.read_pickle('research/experiments/results/pdrop.pkl')
+
+    resolutions = df.index.to_numpy()
+
+    fig = plt.figure()
+    gs = fig.add_gridspec(2, 2, hspace=0, wspace=0)
+    axs = gs.subplots(sharex='col', sharey='row')
+    
+    axs[0, 0].axhline(se["p0035"]*100, color='k', linestyle='--')
+    axs[0, 0].annotate(f'Baseline: {se["p0035"]*100:>.2f}%\n'+r'$p = 0.35\%$', xy=(.25, 80))
+    mean, std = df["p0035", "mean"].to_numpy()*100, df["p0035", "std"].to_numpy()*100     
+    axs[0, 0].plot(resolutions, mean, color='red')
+    axs[0, 0].fill_between(resolutions, mean-std, mean+std, facecolor='red', alpha=0.2)
+
+    axs[0, 1].axhline(se["p006"]*100, color='k', linestyle='--')
+    axs[0, 1].annotate(f'Baseline: {se["p006"]*100:>.2f}%\n'+r'$p = 0.60\%$', xy=(.25, 80))  
+    mean, std = df["p006", "mean"].to_numpy()*100, df["p006", "std"].to_numpy()*100     
+    axs[0, 1].plot(resolutions, mean, color='red')
+    axs[0, 1].fill_between(resolutions, mean-std, mean+std, facecolor='red', alpha=0.2)
+
+    axs[1, 0].axhline(se["p007"]*100, color='k', linestyle='--')
+    axs[1, 0].annotate(f'Baseline: {se["p007"]*100:>.2f}%\n'+r'$p = 0.70\%$', xy=(.25, 80))    
+    mean, std = df["p007", "mean"].to_numpy()*100, df["p007", "std"].to_numpy()*100     
+    axs[1, 0].plot(resolutions, mean, color='red')
+    axs[1, 0].fill_between(resolutions, mean-std, mean+std, facecolor='red', alpha=0.2)
+    
+    axs[1, 1].axhline(se["p01"]*100, color='k', linestyle='--')
+    axs[1, 1].annotate(f'Baseline: {se["p01"]*100:>.2f}%\n'+r'$p = 1.00\%$', xy=(.25, 80))       
+    mean, std = df["p01", "mean"].to_numpy()*100, df["p01", "std"].to_numpy()*100     
+    axs[1, 1].plot(resolutions, mean, color='red')
+    axs[1, 1].fill_between(resolutions, mean-std, mean+std, facecolor='red', alpha=0.2)
+
+    for ax in axs.flat:
+        ax.tick_params(direction='in', which='both')
+        ax.label_outer()
+    
+    fig.supxlabel('Defective device probability [-]')
+    fig.supylabel('Decoder test accuracy [%]')
+
+    plt.savefig('research/plots/pdrop.pdf')
+
+pdrop()

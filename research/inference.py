@@ -19,7 +19,7 @@ from aihwkit.simulator.configs.utils import (
 )
 
 DATA_PATH = 'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p01_Nt1M_rnnData_aT1651079378.txt'
-LOAD_PATH = 'research/saves/mdnd/fp_trained_mdnd_model_d3_p01_nU16_nR3-2022-07-05 18:40:45.209994.pth'
+LOAD_PATH = 'research/saves/mdnd/fp_trained_mdnd_model_d3_p01_nU16_nR3-2022-07-06 10:12:12.403292.pth'
 
 # model parameters
 INPUT_SIZE = 4
@@ -48,8 +48,8 @@ rpu_config.drift_compensation = None
 rpu_config.mapping = MappingParameter(digital_bias=False, # bias term is handled by the analog tile (crossbar)
                                       max_input_size=512,
                                       max_output_size=512)
-rpu_config.forward.inp_res = 1/256.  # 8-bit DAC discretization.
-rpu_config.forward.out_res = 1/256.  # 8-bit ADC discretization.
+rpu_config.forward.inp_res = -1  # 8-bit DAC discretization.
+rpu_config.forward.out_res = -1  # 8-bit ADC discretization.
 
 # training
 rpu_config.clip = WeightClipParameter(sigma=2.5, type=WeightClipType.LAYER_GAUSSIAN)
