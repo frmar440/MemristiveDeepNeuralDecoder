@@ -3,6 +3,7 @@ import matplotlib as mpl
 import numpy as np
 import pickle
 import pandas as pd
+from scipy.optimize import curve_fit
 
 # mpl.rcParams['axes.labelsize'] = 12
 mpl.rcParams["errorbar.capsize"] = 1
@@ -174,4 +175,40 @@ def pdrop():
 
     plt.savefig('research/plots/pdrop.pdf')
 
-pdrop()
+def decoder_performance():
+
+    df = pd.read_pickle('research/experiments/results/decoder_performance.pkl')
+
+    pfr = df.index.to_numpy()
+    pfr_linspace = np.linspace(0.35, 1, 100)
+
+    dnd_mean = df["dnd", "mean"].to_numpy()*100
+    dnd_std = df["dnd", "std"].to_numpy()*100
+    mdnd_mean = df["mdnd", "mean"].to_numpy()*100
+    mdnd_std = df["mdnd", "std"].to_numpy()*100
+
+    def monomial(x, a, b):
+        return a * x**b
+
+    dnd_popt, _ = curve_fit(monomial, pfr, 100-dnd_mean)
+    mdnd_popt, _ = curve_fit(monomial, pfr, 100-mdnd_mean)
+
+    fig, ax = plt.subplots()
+
+    ax.errorbar(pfr, 100-dnd_mean, yerr=dnd_std, marker='s', linestyle='', color='limegreen')
+    ax.plot(pfr_linspace, monomial(pfr_linspace, *dnd_popt), linestyle='-', color='limegreen',
+            label=f'Baseline: {dnd_popt[0]:.2f}*p^{dnd_popt[1]:.2f}')
+    
+    ax.errorbar(pfr, 100-mdnd_mean, yerr=mdnd_std, marker='s', linestyle='', color='dodgerblue')
+    ax.plot(pfr_linspace, monomial(pfr_linspace, *mdnd_popt), linestyle='-', color='dodgerblue',
+            label=f'FP-MDND: {mdnd_popt[0]:.2f}*p^{mdnd_popt[1]:.2f}')
+
+    ax.set_xlabel('Physical fault rate [%]')
+    ax.set_xticks(pfr)
+    ax.set_ylabel('Logical fault rate [%]')
+    ax.tick_params(direction='in', which='both')
+    ax.legend()
+
+    plt.savefig('research/plots/decoder_performance.pdf')
+
+decoder_performance()
