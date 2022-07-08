@@ -3,3 +3,4 @@ from experiments.dac_adc_resolution import dac_adc_resolution_run
 from experiments.prog_noise_scale import prog_noise_scale_run
 from experiments.pdrop import pdrop_run
 from experiments.decoder_performance import decoder_performance_run
+from experiments.fp_learning_rate import fp_learning_rate_run
