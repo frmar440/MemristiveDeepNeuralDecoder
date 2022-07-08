@@ -10,7 +10,8 @@ from datasets import DecodeDataset
 from models import MDND
 from trainers import Trainer
 
-from aihwkit.optim import AnalogSGD
+from torch.optim import Adam
+from aihwkit.optim import AnalogOptimizer
 from aihwkit.simulator.configs import InferenceRPUConfig, FloatingPointRPUConfig
 from aihwkit.inference import RRAMLikeNoiseModel
 from aihwkit.simulator.configs.utils import (
@@ -82,7 +83,7 @@ analog_model.load_state_dict(torch.load(LOAD_PATH), load_rpu_config=False)
 # loss function
 loss_fn = torch.nn.CrossEntropyLoss()
 # analog optimizer
-optimizer = AnalogSGD(analog_model.parameters(), lr=LEARNING_RATE)
+optimizer = AnalogOptimizer(Adam, analog_model.parameters(), lr=LEARNING_RATE)
 optimizer.regroup_param_groups(analog_model)
 # hwa training
 trainer = Trainer(

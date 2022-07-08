@@ -12,7 +12,7 @@ from models import DND, MDND
 from trainers import Tester
 
 from aihwkit.simulator.configs import InferenceRPUConfig, FloatingPointRPUConfig
-from aihwkit.inference import RRAMLikeNoiseModel
+from aihwkit.inference import RRAMLikeNoiseModel, PCMLikeNoiseModel
 from aihwkit.simulator.configs.utils import (
     MappingParameter, WeightClipParameter, WeightClipType,
     WeightModifierParameter, WeightNoiseType, WeightModifierType
@@ -54,7 +54,7 @@ rpu_config.forward.out_res = -1  # 8-bit ADC discretization.
 # training
 rpu_config.clip = WeightClipParameter(sigma=2.5, type=WeightClipType.LAYER_GAUSSIAN)
 # inference
-rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=66.0, prog_noise_scale=1.) # rram noise
+rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200, g_min=66, prog_noise_scale=10.) # rram noise
 rpu_config.modifier = WeightModifierParameter(pdrop=0.0, # defective device probability
                                               enable_during_test=True)
 
