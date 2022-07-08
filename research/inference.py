@@ -11,15 +11,32 @@ from datasets import DecodeDataset
 from models import DND, MDND
 from trainers import Tester
 
+from torch.nn import Linear, Conv1d, Conv2d, Conv3d, Sequential, RNN
+from torch.optim import Adam
+from torchvision.transforms import Lambda
+
+from aihwkit.nn import AnalogLinear, AnalogConv1d, AnalogConv2d, AnalogConv3d, AnalogRNN, AnalogSequential
 from aihwkit.simulator.configs import InferenceRPUConfig, FloatingPointRPUConfig
-from aihwkit.inference import RRAMLikeNoiseModel, PCMLikeNoiseModel
+from aihwkit.simulator.configs.utils import MappingParameter
+from aihwkit.inference import RRAMLikeNoiseModel
 from aihwkit.simulator.configs.utils import (
     MappingParameter, WeightClipParameter, WeightClipType,
     WeightModifierParameter, WeightNoiseType, WeightModifierType
 )
+from aihwkit.nn.conversion import convert_to_analog
+
+
+CONVERSION_MAP = {Linear: AnalogLinear,
+                  Conv1d: AnalogConv1d,
+                  Conv2d: AnalogConv2d,
+                  Conv3d: AnalogConv3d,
+                  RNN: AnalogRNN,
+                  Sequential: AnalogSequential,
+                  DND: MDND}
 
 DATA_PATH = 'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p01_Nt1M_rnnData_aT1651079378.txt'
-LOAD_PATH = 'research/saves/mdnd/fp_trained_mdnd_model_d3_p01_nU16_nR3-2022-07-06 10:12:12.403292.pth'
+MDND_LOAD_PATH = 'research/saves/mdnd/fp_trained_mdnd_model_d3_p01_nU16_nR3-2022-07-06 10:12:12.403292.pth'
+DND_LOAD_PATH = 'research/saves/dnd/fp_trained_dnd_model_d3_p01_nU16_nR3-2022-07-06 10:12:12.403292.pth'
 
 # model parameters
 INPUT_SIZE = 4
@@ -50,13 +67,15 @@ rpu_config.mapping = MappingParameter(digital_bias=False, # bias term is handled
                                       max_output_size=512)
 rpu_config.forward.inp_res = -1  # 8-bit DAC discretization.
 rpu_config.forward.out_res = -1  # 8-bit ADC discretization.
+rpu_config.forward.out_noise = 0.
 
 # training
 rpu_config.clip = WeightClipParameter(sigma=2.5, type=WeightClipType.LAYER_GAUSSIAN)
 # inference
-rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200, g_min=66, prog_noise_scale=10.) # rram noise
+rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200, g_min=66, prog_noise_scale=0.) # rram noise
 rpu_config.modifier = WeightModifierParameter(pdrop=0.0, # defective device probability
                                               enable_during_test=True)
+fp_rpu_config = FloatingPointRPUConfig()
 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -69,16 +88,27 @@ tester = Tester(
     loss_fn=loss_fn
 )
 
+model = DND(
+    input_size=INPUT_SIZE,
+    output_size=OUTPUT_SIZE,
+    hidden_size=HIDDEN_SIZE
+).to(device)
+model.load_state_dict(torch.load(DND_LOAD_PATH))
+
+fp_analog_model = convert_to_analog(model, fp_rpu_config, conversion_map=CONVERSION_MAP)
+analog_model = convert_to_analog(model, rpu_config, conversion_map=CONVERSION_MAP)
 # for w_noise in np.linspace(50., 100., 10):
 #     rpu_config.forward.w_noise = w_noise
 # memristive deep neural decoder
-analog_model = MDND(
-    input_size=INPUT_SIZE,
-    hidden_size=HIDDEN_SIZE,
-    output_size=OUTPUT_SIZE,
-    rpu_config=rpu_config
-).to(device)
-# load weights (but use the current RPU config)
-analog_model.load_state_dict(torch.load(LOAD_PATH), load_rpu_config=False)
+# analog_model = MDND(
+#     input_size=INPUT_SIZE,
+#     hidden_size=HIDDEN_SIZE,
+#     output_size=OUTPUT_SIZE,
+#     rpu_config=rpu_config
+# ).to(device)
+# # load weights (but use the current RPU config)
+# analog_model.load_state_dict(torch.load(LOAD_PATH), load_rpu_config=False)
 # inference
-tester(analog_model, inference=True)
+tester(model)
+tester(fp_analog_model)
+tester(analog_model)

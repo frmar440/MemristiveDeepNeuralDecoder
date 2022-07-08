@@ -30,8 +30,8 @@ HIDDEN_SIZE = 16
 
 # hwa training parameters
 LEARNING_RATE = 1e-3
-BATCH_SIZE = 1024
-EPOCHS = 20
+BATCH_SIZE = 2048
+EPOCHS = 30
 
 
 # load training and test datasets
@@ -65,7 +65,7 @@ rpu_config.clip = WeightClipParameter(sigma=2.5, type=WeightClipType.LAYER_GAUSS
 rpu_config.forward.inp_res = 1/256.  # 8-bit DAC discretization.
 rpu_config.forward.out_res = 1/256.  # 8-bit ADC discretization.
 rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=66.0, prog_noise_scale=1.) # rram noise
-rpu_config.modifier = WeightModifierParameter(pdrop=0.0) # defective device probability
+rpu_config.modifier = WeightModifierParameter(pdrop=0.1) # defective device probability
 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"

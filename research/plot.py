@@ -211,4 +211,24 @@ def decoder_performance():
 
     plt.savefig('research/plots/decoder_performance.pdf')
 
-decoder_performance()
+def fp_learning_rate():
+
+    LEARNING_RATES = [1e-7, 1e-6, 1e-5, 1e-4, 1e-3]
+    df = pd.read_pickle('research/experiments/results/fp_learning_rate.pkl')
+    print(df)
+    epochs = df.index.to_numpy()
+
+    fig, ax = plt.subplots()
+
+    for learning_rate in LEARNING_RATES:
+        ax.plot(epochs, df[learning_rate].to_numpy(), label=f'{learning_rate:.0e}')
+    
+    ax.set_xlabel('Epoch [-]')
+    ax.set_ylabel('Decoder test accuracy [%]')
+    ax.tick_params(direction='in', which='both')
+    ax.legend()
+
+    plt.show()
+
+
+fp_learning_rate()
