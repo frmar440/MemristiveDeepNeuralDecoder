@@ -24,8 +24,8 @@ def fp_learning_rate_run():
     HIDDEN_SIZE = 16
 
     # training parameters
-    LEARNING_RATES = [1e-5, 1e-4, 1e-3]
-    BATCH_SIZE = 512
+    LEARNING_RATES = [1e-4, 1e-3, 1e-2]
+    BATCH_SIZES = [32, 128, 512]
     EPOCHS = 50
 
     # load training and test datasets
@@ -47,37 +47,40 @@ def fp_learning_rate_run():
     )
 
     # dataframe init
+    columns = pd.MultiIndex.from_product([BATCH_SIZES, LEARNING_RATES])
     df = pd.DataFrame(index=np.arange(1, EPOCHS+1),
-                    columns=LEARNING_RATES,
+                    columns=columns,
                     dtype='float64')
 
-    for learning_rate in LEARNING_RATES:
+    for batch_size in BATCH_SIZES:
 
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        # deep neural decoder
-        model = DND(
-            input_size=INPUT_SIZE,
-            output_size=OUTPUT_SIZE,
-            hidden_size=HIDDEN_SIZE
-        ).to(device)
+        for learning_rate in LEARNING_RATES:
 
-        # loss function
-        loss_fn = torch.nn.CrossEntropyLoss()
-        # optimizer
-        optimizer = Adam(model.parameters(), lr=learning_rate)
-        # trainer
-        trainer = Trainer(
-            training_data=training_decode_data,
-            test_data=test_decode_data,
-            learning_rate=learning_rate,
-            batch_size=BATCH_SIZE,
-            epochs=EPOCHS,
-            loss_fn=loss_fn,
-            optimizer=optimizer
-        )
-        # floating-point training
-        trainer(model)
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            # deep neural decoder
+            model = DND(
+                input_size=INPUT_SIZE,
+                output_size=OUTPUT_SIZE,
+                hidden_size=HIDDEN_SIZE
+            ).to(device)
 
-        df[learning_rate] = trainer.accuracies
+            # loss function
+            loss_fn = torch.nn.CrossEntropyLoss()
+            # optimizer
+            optimizer = Adam(model.parameters(), lr=learning_rate)
+            # trainer
+            trainer = Trainer(
+                training_data=training_decode_data,
+                test_data=test_decode_data,
+                learning_rate=learning_rate,
+                batch_size=batch_size,
+                epochs=EPOCHS,
+                loss_fn=loss_fn,
+                optimizer=optimizer
+            )
+            # floating-point training
+            trainer(model)
 
-    df.to_pickle('research/experiments/results/fp_learning_rate_batch512.pkl')
+            df[batch_size, learning_rate] = trainer.accuracies
+
+    df.to_pickle('research/experiments/results/fp_batchsize_lr.pkl')
