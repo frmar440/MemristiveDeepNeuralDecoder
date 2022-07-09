@@ -24,9 +24,9 @@ def fp_learning_rate_run():
     HIDDEN_SIZE = 16
 
     # training parameters
-    LEARNING_RATES = [1e-7, 1e-6, 1e-5, 1e-4, 1e-3]
-    BATCH_SIZE = 32
-    EPOCHS = 30
+    LEARNING_RATES = [1e-5, 1e-4, 1e-3]
+    BATCH_SIZE = 512
+    EPOCHS = 50
 
     # load training and test datasets
     with open(DATA_PATH, 'rb') as f:
@@ -80,4 +80,4 @@ def fp_learning_rate_run():
 
         df[learning_rate] = trainer.accuracies
 
-    df.to_pickle('research/experiments/results/fp_learning_rate_batch32.pkl')
+    df.to_pickle('research/experiments/results/fp_learning_rate_batch512.pkl')
