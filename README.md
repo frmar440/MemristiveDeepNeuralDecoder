@@ -1,3 +1,41 @@
+# Research
+
+This research is intended to assess the capabilities of memristive deep neural networks (AI accelerator) for decoding quantum error correction codes. Since inference time is a concern for deep neural decoders, we tackle this problem by using RRAM crossbars to accelerate the MAC operations.
+
+## Installation
+
+The simulator used is originally from IBM (see below). However, the source code has been modified to meet our needs. To use it, one should compile it directly from this repository (rather than install `aihwkit` from `pip`). Compiling dependencies:
+
+Debian-based:
+```
+$ sudo apt-get install python3-dev libopenblas-dev
+$ pip install cmake scikit-build torch pybind11
+```
+
+OSX:
+```
+$ brew install openblas
+$ pip install cmake scikit-build torch pybind11
+```
+
+Then, the library can be compiled by running:
+```
+$ python setup.py build_ext --inplace
+```
+
+Update the `PYTHONPATH` for the session (has to be run for every session):
+```
+$ export PYTHONPATH=src/
+```
+
+## Run
+
+The research's source code is mostly in the [`research/`] folder. The datasets are proprietary to [1QBit], and thus they are not publicly available.
+
+
+[`research/`]: research/
+[1QBit]: https://1qbit.com/
+
 # IBM Analog Hardware Acceleration Kit
 
 ![PyPI](https://img.shields.io/pypi/v/aihwkit)
