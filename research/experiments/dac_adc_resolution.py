@@ -104,8 +104,8 @@ def dac_adc_resolution_run():
                 rpu_config=rpu_config
             ).to(device)
             # load weights (but use the current RPU config)
-            model.load_state_dict(torch.load(MDND_LOAD_PATH), load_rpu_config=False)
-            
+            model.load_state_dict(torch.load(f'research/saves/fp-mdnd/{MDND_LOAD_PATH}'), load_rpu_config=False)
+
             # statistics iteration
             for _ in range(10):
                 tester(model, inference=True)

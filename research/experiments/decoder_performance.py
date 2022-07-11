@@ -100,7 +100,7 @@ def decoder_performance_run():
                 ).to(device)
                 # load weights
                 DND_LOAD_PATH = list(filter(re_pfr.search, DND_LOAD_PATHS))[0]
-                model.load_state_dict(torch.load(DND_LOAD_PATH))
+                model.load_state_dict(torch.load(f'research/saves/dnd/{DND_LOAD_PATH}'))
 
             elif model_label == "fp-mdnd":
                 model = MDND(
@@ -111,7 +111,7 @@ def decoder_performance_run():
                 ).to(device)
                 # load weights (but use the current RPU config)
                 MDND_LOAD_PATH = list(filter(re_pfr.search, MDND_LOAD_PATHS))[0]
-                model.load_state_dict(torch.load(MDND_LOAD_PATH), load_rpu_config=False)
+                model.load_state_dict(torch.load(f'research/saves/fp-mdnd/{MDND_LOAD_PATH}'), load_rpu_config=False)
 
             # statistics iteration
             for _ in range(10):
