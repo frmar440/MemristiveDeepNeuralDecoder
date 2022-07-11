@@ -1,4 +1,4 @@
-"""FP learning rate experiment
+"""FP batch size - learning rate experiment
 """
 import torch
 import json
@@ -11,11 +11,10 @@ from datasets import DecodeDataset
 from models import DND, MDND
 from trainers import Trainer
 
-from torch.nn import Linear, Conv1d, Conv2d, Conv3d, Sequential, RNN
 from torch.optim import Adam
 from torchvision.transforms import Lambda
 
-def fp_learning_rate_run():
+def fp_batchsize_lr_run():
     DATA_PATH = 'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p01_Nt1M_rnnData_aT1651079378.txt'
 
     # model parameters
@@ -49,8 +48,8 @@ def fp_learning_rate_run():
     # dataframe init
     columns = pd.MultiIndex.from_product([BATCH_SIZES, LEARNING_RATES])
     df = pd.DataFrame(index=np.arange(1, EPOCHS+1),
-                    columns=columns,
-                    dtype='float64')
+                      columns=columns,
+                      dtype='float64')
 
     for batch_size in BATCH_SIZES:
 

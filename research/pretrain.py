@@ -1,8 +1,9 @@
-"""Training script
+"""Pretrain script
 """
 import torch
 import json
 import pickle
+import re
 from datetime import datetime
 
 from datasets import DecodeDataset
@@ -37,26 +38,6 @@ DATA_PATHS = [
     'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p0085_Nt1M_rnnData_aT1651078854.txt',
     'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p01_Nt1M_rnnData_aT1651079378.txt'
 ]
-IDS_DND = [
-    'fp_trained_dnd_model_d3_p0015_nU16_nR3',
-    'fp_trained_dnd_model_d3_p0035_nU16_nR3',
-    'fp_trained_dnd_model_d3_p005_nU16_nR3',
-    'fp_trained_dnd_model_d3_p006_nU16_nR3',
-    'fp_trained_dnd_model_d3_p0065_nU16_nR3',
-    'fp_trained_dnd_model_d3_p007_nU16_nR3',
-    'fp_trained_dnd_model_d3_p0085_nU16_nR3',
-    'fp_trained_dnd_model_d3_p01_nU16_nR3'
-]
-IDS_MDND = [
-    'fp_trained_mdnd_model_d3_p0015_nU16_nR3',
-    'fp_trained_mdnd_model_d3_p0035_nU16_nR3',
-    'fp_trained_mdnd_model_d3_p005_nU16_nR3',
-    'fp_trained_mdnd_model_d3_p006_nU16_nR3',
-    'fp_trained_mdnd_model_d3_p0065_nU16_nR3',
-    'fp_trained_mdnd_model_d3_p007_nU16_nR3',
-    'fp_trained_mdnd_model_d3_p0085_nU16_nR3',
-    'fp_trained_mdnd_model_d3_p01_nU16_nR3'
-]
 
 # model parameters
 INPUT_SIZE = 4
@@ -68,7 +49,9 @@ LEARNING_RATE = 1e-3
 BATCH_SIZE = 32
 EPOCHS = 50
 
-for DATA_PATH, ID_DND, ID_MDND in zip(DATA_PATHS, IDS_DND, IDS_MDND):
+for DATA_PATH in DATA_PATHS:
+
+    pfr = re.search('p[0-9]*', DATA_PATH).group(0)
     # load training and test datasets
     with open(DATA_PATH, 'rb') as f:
         dico = pickle.loads(f.read())
@@ -117,18 +100,18 @@ for DATA_PATH, ID_DND, ID_MDND in zip(DATA_PATHS, IDS_DND, IDS_MDND):
 
     time = datetime.now()
     # save dnd
-    torch.save(model.state_dict(), f'research/saves/dnd/{ID_DND}-{time}.pth')
+    torch.save(model.state_dict(),
+               f'research/saves/dnd/fp_trained_dnd_model_d3_{pfr}_nU{HIDDEN_SIZE}-{time}.pth')
     # save fp training parameters
-    with open(f'research/saves/dnd/{ID_DND}-{time}.json', 'w') as file:
+    with open(f'research/saves/dnd/fp_trained_dnd_model_d3_{pfr}_nU{HIDDEN_SIZE}-{time}.json', 'w') as file:
         file.write(json.dumps(trainer.training_state_dict()))
 
 
     # resistive processing unit
     rpu_config = InferenceRPUConfig()
-    rpu_config.mapping = MappingParameter(digital_bias=False, # bias term is handled by the analog tile (crossbar)
-                                          max_input_size=512,
-                                          max_output_size=512)
+    rpu_config.mapping = MappingParameter(digital_bias=False) # bias term is handled by the analog tile (crossbar)
     # convert dnd to mdnd
     analog_model = convert_to_analog(model, rpu_config, conversion_map=CONVERSION_MAP)
     # save mdnd
-    torch.save(analog_model.state_dict(), f'research/saves/mdnd/{ID_MDND}-{time}.pth')
+    torch.save(analog_model.state_dict(),
+               f'research/saves/mdnd/fp_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}-{time}.pth')
