@@ -33,7 +33,7 @@ def dac_adc_resolution_run():
         'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p0085_Nt1M_rnnData_aT1651078854.txt',
         'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p01_Nt1M_rnnData_aT1651079378.txt'
     ]
-    MDND_LOAD_PATHS = os.listdir('research/saves/mdnd')
+    MDND_LOAD_PATHS = os.listdir('research/saves/fp-mdnd')
 
     # model parameters
     INPUT_SIZE = 4
