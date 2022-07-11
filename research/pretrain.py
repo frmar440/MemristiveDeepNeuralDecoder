@@ -28,33 +28,33 @@ CONVERSION_MAP = {Linear: AnalogLinear,
                   DND: MDND}
 
 DATA_PATHS = [
-    # 'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p0015_Nt1M_rnnData_aT1651078684.txt',
+    'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p0015_Nt1M_rnnData_aT1651078684.txt',
     'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p0035_Nt1M_rnnData_aT1651078734.txt',
-    # 'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p005_Nt1M_rnnData_aT1651078773.txt',
+    'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p005_Nt1M_rnnData_aT1651078773.txt',
     'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p006_Nt1M_rnnData_aT1651078797.txt',
-    # 'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p0065_Nt1M_rnnData_aT1651078809.txt',
+    'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p0065_Nt1M_rnnData_aT1651078809.txt',
     'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p007_Nt1M_rnnData_aT1651078820.txt',
-    # 'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p0085_Nt1M_rnnData_aT1651078854.txt',
+    'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p0085_Nt1M_rnnData_aT1651078854.txt',
     'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p01_Nt1M_rnnData_aT1651079378.txt'
 ]
 IDS_DND = [
-    # 'fp_trained_dnd_model_d3_p0015_nU16_nR3',
+    'fp_trained_dnd_model_d3_p0015_nU16_nR3',
     'fp_trained_dnd_model_d3_p0035_nU16_nR3',
-    # 'fp_trained_dnd_model_d3_p005_nU16_nR3',
+    'fp_trained_dnd_model_d3_p005_nU16_nR3',
     'fp_trained_dnd_model_d3_p006_nU16_nR3',
-    # 'fp_trained_dnd_model_d3_p0065_nU16_nR3',
+    'fp_trained_dnd_model_d3_p0065_nU16_nR3',
     'fp_trained_dnd_model_d3_p007_nU16_nR3',
-    # 'fp_trained_dnd_model_d3_p0085_nU16_nR3',
+    'fp_trained_dnd_model_d3_p0085_nU16_nR3',
     'fp_trained_dnd_model_d3_p01_nU16_nR3'
 ]
 IDS_MDND = [
-    # 'fp_trained_mdnd_model_d3_p0015_nU16_nR3',
+    'fp_trained_mdnd_model_d3_p0015_nU16_nR3',
     'fp_trained_mdnd_model_d3_p0035_nU16_nR3',
-    # 'fp_trained_mdnd_model_d3_p005_nU16_nR3',
+    'fp_trained_mdnd_model_d3_p005_nU16_nR3',
     'fp_trained_mdnd_model_d3_p006_nU16_nR3',
-    # 'fp_trained_mdnd_model_d3_p0065_nU16_nR3',
+    'fp_trained_mdnd_model_d3_p0065_nU16_nR3',
     'fp_trained_mdnd_model_d3_p007_nU16_nR3',
-    # 'fp_trained_mdnd_model_d3_p0085_nU16_nR3',
+    'fp_trained_mdnd_model_d3_p0085_nU16_nR3',
     'fp_trained_mdnd_model_d3_p01_nU16_nR3'
 ]
 
@@ -65,8 +65,8 @@ HIDDEN_SIZE = 16
 
 # training parameters
 LEARNING_RATE = 1e-3
-BATCH_SIZE = 1024
-EPOCHS = 30
+BATCH_SIZE = 32
+EPOCHS = 50
 
 for DATA_PATH, ID_DND, ID_MDND in zip(DATA_PATHS, IDS_DND, IDS_MDND):
     # load training and test datasets
@@ -126,8 +126,8 @@ for DATA_PATH, ID_DND, ID_MDND in zip(DATA_PATHS, IDS_DND, IDS_MDND):
     # resistive processing unit
     rpu_config = InferenceRPUConfig()
     rpu_config.mapping = MappingParameter(digital_bias=False, # bias term is handled by the analog tile (crossbar)
-                                        max_input_size=512,
-                                        max_output_size=512)
+                                          max_input_size=512,
+                                          max_output_size=512)
     # convert dnd to mdnd
     analog_model = convert_to_analog(model, rpu_config, conversion_map=CONVERSION_MAP)
     # save mdnd

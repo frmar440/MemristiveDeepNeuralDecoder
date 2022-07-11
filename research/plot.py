@@ -214,7 +214,7 @@ def decoder_performance():
 def fp_learning_rate():
 
     LEARNING_RATES = [1e-7, 1e-6, 1e-5, 1e-4, 1e-3]
-    df = pd.read_pickle('research/experiments/results/fp_learning_rate_batch32.pkl')
+    df = pd.read_pickle('research/experiments/results/fp_batchsize_lr.pkl')
     print(df)
     epochs = df.index.to_numpy()
 
