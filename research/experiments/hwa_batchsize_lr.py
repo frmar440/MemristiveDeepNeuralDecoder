@@ -14,8 +14,17 @@ from trainers import Trainer
 from torch.optim import Adam
 from torchvision.transforms import Lambda
 
+from aihwkit.optim import AnalogOptimizer
+from aihwkit.simulator.configs import InferenceRPUConfig, FloatingPointRPUConfig
+from aihwkit.inference import RRAMLikeNoiseModel
+from aihwkit.simulator.configs.utils import (
+    MappingParameter, WeightClipParameter, WeightClipType,
+    WeightModifierParameter, WeightNoiseType, WeightModifierType
+)
+
 def fp_batchsize_lr_run():
     DATA_PATH = 'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p01_Nt1M_rnnData_aT1651079378.txt'
+    LOAD_PATH = ''
 
     # model parameters
     INPUT_SIZE = 4
@@ -25,7 +34,7 @@ def fp_batchsize_lr_run():
     # training parameters
     LEARNING_RATES = [1e-4, 1e-3, 1e-2]
     BATCH_SIZES = [32, 128, 512]
-    EPOCHS = 50
+    EPOCHS = 30
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     # loss function
@@ -49,6 +58,24 @@ def fp_batchsize_lr_run():
         target_transform=Lambda(lambda y: torch.zeros(2, dtype=torch.float).scatter_(0, torch.tensor(y), value=1)) # one-hot encoding
     )
 
+    # resistive processing unit
+    rpu_config = InferenceRPUConfig()
+    rpu_config.drift_compensation = None
+    rpu_config.mapping = MappingParameter(digital_bias=False, # bias term is handled by the analog tile (crossbar)
+                                          max_input_size=512,
+                                          max_output_size=512)
+    # training
+    # rpu_config.clip = WeightClipParameter(sigma=2.5, type=WeightClipType.LAYER_GAUSSIAN)
+    # training and inference
+    rpu_config.forward.inp_res = 1/256.  # 8-bit DAC discretization.
+    rpu_config.forward.out_res = 1/256.  # 8-bit ADC discretization.
+    rpu_config.forward.out_noise = 0.
+    rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=60.0, prog_noise_scale=1.) # rram noise
+    rpu_config.modifier = WeightModifierParameter(pdrop=0.1, # defective device probability
+                                                  enable_during_test=True,
+                                                  std_dev=0.005, # 0.5% training noise
+                                                  type=WeightModifierType.ADD_NORMAL)
+
     # dataframe init
     columns = pd.MultiIndex.from_product([BATCH_SIZES, LEARNING_RATES])
     df = pd.DataFrame(index=np.arange(1, EPOCHS+1),
@@ -58,9 +85,10 @@ def fp_batchsize_lr_run():
     for batch_size in BATCH_SIZES:
 
         for learning_rate in LEARNING_RATES:
-            
-            # optimizer
-            optimizer = Adam(model.parameters(), lr=learning_rate)
+
+            # analog optimizer
+            optimizer = AnalogOptimizer(Adam, analog_model.parameters(), lr=learning_rate)
+            optimizer.regroup_param_groups(analog_model)
 
             # trainer
             trainer = Trainer(
@@ -73,16 +101,18 @@ def fp_batchsize_lr_run():
                 optimizer=optimizer
             )
 
-            # deep neural decoder
-            model = DND(
+            # memristive deep neural decoder
+            analog_model = DND(
                 input_size=INPUT_SIZE,
                 output_size=OUTPUT_SIZE,
                 hidden_size=HIDDEN_SIZE
             ).to(device)
+            # load weights (but use the current RPU config)
+            analog_model.load_state_dict(torch.load(LOAD_PATH), load_rpu_config=False)
 
-            # floating-point training
-            trainer(model)
+            # hwa training
+            trainer(analog_model)
 
             df[batch_size, learning_rate] = trainer.accuracies
 
-    df.to_pickle('research/experiments/results/fp_batchsize_lr.pkl')
+    df.to_pickle('research/experiments/results/hwa_batchsize_lr.pkl')

@@ -214,4 +214,12 @@ def decoder_performance_plot():
 
     plt.savefig('research/plots/decoder_performance.pdf')
 
+def weight_distribution_plot():
 
+    pass
+
+
+dac_adc_resolution_plot()
+prog_noise_scale_plot()
+pdrop_plot()
+decoder_performance_plot()

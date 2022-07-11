@@ -112,6 +112,6 @@ for DATA_PATH in DATA_PATHS:
     rpu_config.mapping = MappingParameter(digital_bias=False) # bias term is handled by the analog tile (crossbar)
     # convert dnd to mdnd
     analog_model = convert_to_analog(model, rpu_config, conversion_map=CONVERSION_MAP)
-    # save mdnd
+    # save fp-mdnd
     torch.save(analog_model.state_dict(),
                f'research/saves/mdnd/fp_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}-{time}.pth')

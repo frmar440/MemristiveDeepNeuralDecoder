@@ -55,7 +55,7 @@ def prog_noise_scale_run():
     rpu_config.forward.inp_res = -1.  # infinite steps.
     rpu_config.forward.out_res = -1.  # infinite steps.
     rpu_config.forward.out_noise = 0.
-    rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=66.0, prog_noise_scale=0.) # rram noise
+    rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=60.0, prog_noise_scale=0.) # rram noise
     rpu_config.modifier = WeightModifierParameter(pdrop=0.0, # defective device probability
                                                   enable_during_test=True)
 
