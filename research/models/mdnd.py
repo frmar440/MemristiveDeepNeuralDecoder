@@ -5,7 +5,7 @@ from typing import Optional, Any, OrderedDict
 from torch import Tensor
 from aihwkit.exceptions import ModuleError
 from aihwkit.nn import AnalogRNN, AnalogLinear, AnalogSequential
-from aihwkit.nn.modules.base import RPUConfigAlias
+from aihwkit.nn.modules.base import RPUConfigAlias, AnalogModuleBase
 
 
 class MDND(AnalogSequential):
@@ -74,6 +74,13 @@ class MDND(AnalogSequential):
         analog_module._modules = module._modules
 
         return analog_module
+
+    def get_weights(self):
+        weights = []
+        for module in self.modules():
+            if isinstance(module, AnalogModuleBase):
+                weights.extend(module.get_weights())
+        return weights
 
     def forward(self, inputs: Tensor):
         """Compute the forward pass."""

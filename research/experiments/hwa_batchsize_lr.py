@@ -1,4 +1,4 @@
-"""FP batch size - learning rate experiment
+"""HWA batch size - learning rate experiment
 """
 import torch
 import json
@@ -22,7 +22,7 @@ from aihwkit.simulator.configs.utils import (
     WeightModifierParameter, WeightNoiseType, WeightModifierType
 )
 
-def fp_batchsize_lr_run():
+def hwa_batchsize_lr_run():
     DATA_PATH = 'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p01_Nt1M_rnnData_aT1651079378.txt'
     LOAD_PATH = ''
 

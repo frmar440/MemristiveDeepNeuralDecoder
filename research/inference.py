@@ -35,8 +35,8 @@ CONVERSION_MAP = {Linear: AnalogLinear,
                   DND: MDND}
 
 DATA_PATH = 'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p01_Nt1M_rnnData_aT1651079378.txt'
-MDND_LOAD_PATH = 'research/saves/mdnd/fp_trained_mdnd_model_d3_p01_nU16_nR3-2022-07-06 10:12:12.403292.pth'
-DND_LOAD_PATH = 'research/saves/dnd/fp_trained_dnd_model_d3_p01_nU16_nR3-2022-07-06 10:12:12.403292.pth'
+MDND_LOAD_PATH = 'research/saves/fp-mdnd/fp_trained_mdnd_model_d3_p01_nU16_nR3-2022-07-11 12:25:29.338821.pth'
+DND_LOAD_PATH = ''
 
 # model parameters
 INPUT_SIZE = 4
@@ -44,7 +44,7 @@ OUTPUT_SIZE = 2
 HIDDEN_SIZE = 16
 
 # inference parameters
-BATCH_SIZE = 1024
+BATCH_SIZE = 32
 
 
 # load test dataset
@@ -88,27 +88,14 @@ tester = Tester(
     loss_fn=loss_fn
 )
 
-model = DND(
-    input_size=INPUT_SIZE,
-    output_size=OUTPUT_SIZE,
-    hidden_size=HIDDEN_SIZE
-).to(device)
-model.load_state_dict(torch.load(DND_LOAD_PATH))
-
-fp_analog_model = convert_to_analog(model, fp_rpu_config, conversion_map=CONVERSION_MAP)
-analog_model = convert_to_analog(model, rpu_config, conversion_map=CONVERSION_MAP)
-# for w_noise in np.linspace(50., 100., 10):
-#     rpu_config.forward.w_noise = w_noise
 # memristive deep neural decoder
-# analog_model = MDND(
-#     input_size=INPUT_SIZE,
-#     hidden_size=HIDDEN_SIZE,
-#     output_size=OUTPUT_SIZE,
-#     rpu_config=rpu_config
-# ).to(device)
-# # load weights (but use the current RPU config)
-# analog_model.load_state_dict(torch.load(LOAD_PATH), load_rpu_config=False)
-# inference
-tester(model)
-tester(fp_analog_model)
-tester(analog_model)
+analog_model = MDND(
+    input_size=INPUT_SIZE,
+    hidden_size=HIDDEN_SIZE,
+    output_size=OUTPUT_SIZE,
+    rpu_config=rpu_config
+).to(device)
+# load weights (but use the current RPU config)
+analog_model.load_state_dict(torch.load(MDND_LOAD_PATH), load_rpu_config=False)
+
+print("")
