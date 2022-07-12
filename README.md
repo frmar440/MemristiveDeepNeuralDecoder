@@ -18,9 +18,12 @@ $ brew install openblas
 $ pip install cmake scikit-build torch pybind11
 ```
 
-Then, the library can be compiled by running:
+Then, the library can be compiled:
 ```
-$ python setup.py build_ext --inplace
+$ mkdir build
+$ cd build
+build$ cmake ..
+build$ make
 ```
 
 Update the `PYTHONPATH` for the session (has to be run for every session):
