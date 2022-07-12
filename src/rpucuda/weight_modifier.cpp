@@ -110,6 +110,19 @@ void WeightModifier<T>::apply(
 
     break;
   }
+  case WeightModifierType::RelNormal: {
+
+    if (wmpar.std_dev > 0) {
+      const T std = wmpar.std_dev;
+      PRAGMA_SIMD
+      for (int i = 0; i < size_; i++) {
+        T w = new_weights[i];
+        new_weights[i] += w * std * rw_rng_.sampleGauss();
+      }
+    }
+
+    break;
+  }
 
   case WeightModifierType::Poly: {
 

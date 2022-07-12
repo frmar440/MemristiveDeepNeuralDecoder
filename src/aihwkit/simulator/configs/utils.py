@@ -194,6 +194,12 @@ class WeightModifierType(Enum):
     ADD_NORMAL = 'AddNormal'
     """Additive Gaussian noise."""
 
+    REL_NORMAL = 'RelNormal'
+    """Relative Gaussian noise.
+    
+    :math:`w = w + w * std_dev`
+    """
+
     DISCRETIZE_ADD_NORMAL = 'DiscretizeAddNormal'
     """First discretize and then additive Gaussian noise."""
 
@@ -484,10 +490,10 @@ class WeightModifierParameter(_PrintableMixin):
     std_dev: float = 0.0
     """Standard deviation of the added noise to the weight matrix.
 
-    This parameter affects the modifier types ``AddNormal``, ``MultNormal`` and
+    This parameter affects the modifier types ``AddNormal``, ``MultNormal``, ``RelNormal`` and
     ``DiscretizeAddNormal``.
 
-    Note:
+    Note (not applicable for ``RelNormal``):
         If the parameter ``rel_to_actual_wmax`` is set then the ``std_dev`` is
         computed in relative terms to the abs max of the given weight matrix,
         otherwise it in relative terms to the assumed max, which is set by

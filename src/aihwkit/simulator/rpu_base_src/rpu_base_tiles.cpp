@@ -43,6 +43,7 @@ void declare_rpu_tiles(py::module &m) {
       .value("Discretize", RPU::WeightModifierType::Discretize)
       .value("MultNormal", RPU::WeightModifierType::MultNormal)
       .value("AddNormal", RPU::WeightModifierType::AddNormal)
+      .value("RelNormal", RPU::WeightModifierType::RelNormal)
       .value("DiscretizeAddNormal", RPU::WeightModifierType::DiscretizeAddNormal)
       .value("DoReFa", RPU::WeightModifierType::DoReFa)
       .value("Poly", RPU::WeightModifierType::Poly);

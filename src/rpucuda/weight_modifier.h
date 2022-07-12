@@ -22,6 +22,7 @@ enum class WeightModifierType {
   Discretize,
   MultNormal,
   AddNormal,
+  RelNormal,
   DiscretizeAddNormal,
   DoReFa,
   Poly
@@ -54,6 +55,8 @@ struct WeightModifierParameter {
       return "Copy";
     case WeightModifierType::MultNormal:
       return "MultNormal";
+    case WeightModifierType::RelNormal:
+      return "RelNormal";
     case WeightModifierType::Discretize:
       return "Discretize";
     case WeightModifierType::AddNormal:
@@ -79,7 +82,7 @@ struct WeightModifierParameter {
     ss << "\t weight modifier type:\t" << getTypeName() << std::endl;
     if (type != WeightModifierType::Copy) {
       if (type == WeightModifierType::Poly || type == WeightModifierType::MultNormal ||
-          type == WeightModifierType::AddNormal ||
+          type == WeightModifierType::AddNormal || type == WeightModifierType::RelNormal ||
           type == WeightModifierType::DiscretizeAddNormal) {
         ss << "\t std_dev:\t\t" << std_dev << std::endl;
       }
@@ -114,6 +117,7 @@ struct WeightModifierParameter {
         pdrop > 0 || (type == WeightModifierType::Discretize && sto_round) ||
         type == WeightModifierType::MultNormal || type == WeightModifierType::Poly ||
         type == WeightModifierType::AddNormal || type == WeightModifierType::DiscretizeAddNormal ||
+        type == WeightModifierType::RelNormal ||
         (type == WeightModifierType::DoReFa && sto_round));
   };
 };
