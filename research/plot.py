@@ -361,9 +361,69 @@ def weight_clip_plot():
 
     plt.savefig('research/plots/weight_clip.pdf')
 
+def training_noise_plot():
+
+    df = pd.read_pickle('research/experiments/results/training_noise.pkl')
+    std_dev = df.index.to_numpy()*100
+
+    decoder_performance = pd.read_pickle('research/experiments/results/decoder_performance.pkl')
+    baseline = decoder_performance["baseline", "mean"]
+    fp_mdnd = decoder_performance["fp-mdnd", "mean"]
+
+    fig, ax = plt.subplots()
+
+    ax.axhline(baseline[1.0]*100, color='k', linestyle='--')
+    ax.axhline(fp_mdnd[1.0]*100, color='k', linestyle=':')
+    ax.annotate(f'Baseline: {baseline[1.0]*100:>.2f}%\n'
+                f'FP-MDND: {fp_mdnd[1.0]*100:>.2f}%\n'
+                r'$p = 0.15\%$',
+                xy=(.45, .5), xycoords='axes fraction')
+    mean, std = df["p01", "mean"].to_numpy()*100, df["p01", "std"].to_numpy()*100     
+    ax.plot(std_dev, mean, color='purple')
+    ax.fill_between(std_dev, mean-std, mean+std, facecolor='violet', alpha=0.3)
+
+    ax.set_xlabel('Relative training noise [%]')
+    ax.set_ylabel('Decoder test accuracy [%]')
+    ax.tick_params(direction='in')
+
+    plt.show()
+
+def training_pdrop_plot():
+
+    df = pd.read_pickle('research/experiments/results/training_pdrop.pkl')
+    pdrop = df.index.to_numpy()
+
+    decoder_performance = pd.read_pickle('research/experiments/results/decoder_performance.pkl')
+    baseline = decoder_performance["baseline", "mean"]
+    fp_mdnd = decoder_performance["fp-mdnd", "mean"]
+
+    fig, ax = plt.subplots()
+
+    ax.axhline(baseline[1.0]*100, color='k', linestyle='--')
+    ax.axhline(fp_mdnd[1.0]*100, color='k', linestyle=':')
+    ax.annotate(f'Baseline: {baseline[1.0]*100:>.2f}%\n'
+                f'FP-MDND: {fp_mdnd[1.0]*100:>.2f}%\n'
+                r'$p = 0.15\%$',
+                xy=(.45, .5), xycoords='axes fraction')
+    mean, std = df["p01", "mean"].to_numpy()*100, df["p01", "std"].to_numpy()*100     
+    ax.plot(pdrop, mean, color='red')
+    ax.fill_between(pdrop, mean-std, mean+std, facecolor='red', alpha=0.2)
+
+    ax.set_xlabel('Training drop connections [-]')
+    ax.set_ylabel('Decoder test accuracy [%]')
+    ax.tick_params(direction='in')
+
+    plt.show()
+
+def weight_hwaclip_plot():
+    pass
+
+def conductances():
+    pass
+
 # dac_adc_resolution_plot()
 # prog_noise_scale_plot()
 # pdrop_plot()
-decoder_performance_plot()
+# decoder_performance_plot()
 
 # weight_clip_plot()

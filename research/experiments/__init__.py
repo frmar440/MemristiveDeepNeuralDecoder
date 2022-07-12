@@ -3,3 +3,5 @@ from experiments.prog_noise_scale import prog_noise_scale_run
 from experiments.pdrop import pdrop_run
 from experiments.decoder_performance import decoder_performance_run
 from experiments.fp_batchsize_lr import fp_batchsize_lr_run
+from experiments.training_noise import training_noise_run
+from experiments.training_pdrop import training_pdrop_run

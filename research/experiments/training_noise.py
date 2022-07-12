@@ -20,7 +20,7 @@ from aihwkit.simulator.configs.utils import (
     WeightModifierParameter, WeightNoiseType, WeightModifierType
 )
 
-def dac_adc_resolution_run():
+def training_noise_run():
     STD = np.linspace(0.0, 0.05, 11)
 
     DATA_PATHS = [
