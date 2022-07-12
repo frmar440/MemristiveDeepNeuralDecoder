@@ -63,23 +63,27 @@ def dac_adc_resolution_plot():
     gs = fig.add_gridspec(2, 2, hspace=0, wspace=0)
     axs = gs.subplots(sharex='col', sharey='row')
     
-    axs[0, 0].axhline(baseline["p0015"]*100, color='k', linestyle='--')
-    axs[0, 0].annotate(f'Baseline: {baseline["p0015"]*100:>.2f}%\n'+r'$p = 0.15\%$', xy=(15, 80))     
+    axs[0, 0].axhline(baseline[0.15]*100, color='k', linestyle='--')
+    axs[0, 0].annotate(f'Baseline: {baseline[0.15]*100:>.2f}%\n'+r'$p = 0.15\%$',
+                        xy=(.45, .5), xycoords='axes fraction')     
     axs[0, 0].errorbar(resolutions, df["p0015", "mean"].to_numpy()*100, yerr=df["p0015", "std"].to_numpy()*100,
                  marker='s', color='orange')
 
-    axs[0, 1].axhline(baseline["p005"]*100, color='k', linestyle='--')
-    axs[0, 1].annotate(f'Baseline: {baseline["p005"]*100:>.2f}%\n'+r'$p = 0.50\%$', xy=(15, 80))  
+    axs[0, 1].axhline(baseline[0.5]*100, color='k', linestyle='--')
+    axs[0, 1].annotate(f'Baseline: {baseline[0.5]*100:>.2f}%\n'+r'$p = 0.50\%$',
+                        xy=(.45, .5), xycoords='axes fraction')  
     axs[0, 1].errorbar(resolutions, df["p005", "mean"].to_numpy()*100, yerr=df["p005", "std"].to_numpy()*100,
                  marker='s', color='orange')
 
-    axs[1, 0].axhline(baseline["p007"]*100, color='k', linestyle='--')
-    axs[1, 0].annotate(f'Baseline: {baseline["p007"]*100:>.2f}%\n'+r'$p = 0.70\%$', xy=(15, 80))    
+    axs[1, 0].axhline(baseline[0.7]*100, color='k', linestyle='--')
+    axs[1, 0].annotate(f'Baseline: {baseline[0.7]*100:>.2f}%\n'+r'$p = 0.70\%$',
+                        xy=(.45, .5), xycoords='axes fraction')    
     axs[1, 0].errorbar(resolutions, df["p007", "mean"].to_numpy()*100, yerr=df["p007", "std"].to_numpy()*100,
                  marker='s', color='orange')
     
-    axs[1, 1].axhline(baseline["p01"]*100, color='k', linestyle='--')
-    axs[1, 1].annotate(f'Baseline: {baseline["p01"]*100:>.2f}%\n'+r'$p = 1.00\%$', xy=(15, 80))       
+    axs[1, 1].axhline(baseline[1.0]*100, color='k', linestyle='--')
+    axs[1, 1].annotate(f'Baseline: {baseline[1.0]*100:>.2f}%\n'+r'$p = 1.00\%$',
+                        xy=(.45, .5), xycoords='axes fraction')       
     axs[1, 1].errorbar(resolutions, df["p01", "mean"].to_numpy()*100, yerr=df["p01", "std"].to_numpy()*100,
                  marker='s', color='orange')
 
@@ -106,26 +110,30 @@ def prog_noise_scale_plot():
     gs = fig.add_gridspec(2, 2, hspace=0, wspace=0)
     axs = gs.subplots(sharex='col', sharey='row')
     
-    axs[0, 0].axhline(baseline["p0015"]*100, color='k', linestyle='--')
-    axs[0, 0].annotate(f'Baseline: {baseline["p0015"]*100:>.2f}%\n'+r'$p = 0.15\%$', xy=(1, 40))
+    axs[0, 0].axhline(baseline[0.15]*100, color='k', linestyle='--')
+    axs[0, 0].annotate(f'Baseline: {baseline[0.15]*100:>.2f}%\n'+r'$p = 0.15\%$',
+                        xy=(.1, .1), xycoords='axes fraction')
     mean, std = df["p0015", "mean"].to_numpy()*100, df["p0015", "std"].to_numpy()*100     
     axs[0, 0].plot(noise_scales, mean, color='purple')
     axs[0, 0].fill_between(noise_scales, mean-std, mean+std, facecolor='violet', alpha=0.3)
 
-    axs[0, 1].axhline(baseline["p005"]*100, color='k', linestyle='--')
-    axs[0, 1].annotate(f'Baseline: {baseline["p005"]*100:>.2f}%\n'+r'$p = 0.50\%$', xy=(1, 40))  
+    axs[0, 1].axhline(baseline[0.5]*100, color='k', linestyle='--')
+    axs[0, 1].annotate(f'Baseline: {baseline[0.5]*100:>.2f}%\n'+r'$p = 0.50\%$',
+                        xy=(.1, .1), xycoords='axes fraction')  
     mean, std = df["p005", "mean"].to_numpy()*100, df["p005", "std"].to_numpy()*100     
     axs[0, 1].plot(noise_scales, mean, color='purple')
     axs[0, 1].fill_between(noise_scales, mean-std, mean+std, facecolor='violet', alpha=0.3)
 
-    axs[1, 0].axhline(baseline["p007"]*100, color='k', linestyle='--')
-    axs[1, 0].annotate(f'Baseline: {baseline["p007"]*100:>.2f}%\n'+r'$p = 0.70\%$', xy=(1, 40))    
+    axs[1, 0].axhline(baseline[0.7]*100, color='k', linestyle='--')
+    axs[1, 0].annotate(f'Baseline: {baseline[0.7]*100:>.2f}%\n'+r'$p = 0.70\%$',
+                        xy=(.1, .1), xycoords='axes fraction')    
     mean, std = df["p007", "mean"].to_numpy()*100, df["p007", "std"].to_numpy()*100     
     axs[1, 0].plot(noise_scales, mean, color='purple')
     axs[1, 0].fill_between(noise_scales, mean-std, mean+std, facecolor='violet', alpha=0.3)
     
-    axs[1, 1].axhline(baseline["p01"]*100, color='k', linestyle='--')
-    axs[1, 1].annotate(f'Baseline: {baseline["p01"]*100:>.2f}%\n'+r'$p = 1.00\%$', xy=(1, 40))       
+    axs[1, 1].axhline(baseline[1.0]*100, color='k', linestyle='--')
+    axs[1, 1].annotate(f'Baseline: {baseline[1.0]*100:>.2f}%\n'+r'$p = 1.00\%$',
+                        xy=(.1, .1), xycoords='axes fraction')       
     mean, std = df["p01", "mean"].to_numpy()*100, df["p01", "std"].to_numpy()*100     
     axs[1, 1].plot(noise_scales, mean, color='purple')
     axs[1, 1].fill_between(noise_scales, mean-std, mean+std, facecolor='violet', alpha=0.3)
@@ -151,26 +159,30 @@ def pdrop_plot():
     gs = fig.add_gridspec(2, 2, hspace=0, wspace=0)
     axs = gs.subplots(sharex='col', sharey='row')
     
-    axs[0, 0].axhline(baseline["p0015"]*100, color='k', linestyle='--')
-    axs[0, 0].annotate(f'Baseline: {baseline["p0015"]*100:>.2f}%\n'+r'$p = 0.15\%$', xy=(.25, 80))
+    axs[0, 0].axhline(baseline[0.15]*100, color='k', linestyle='--')
+    axs[0, 0].annotate(f'Baseline: {baseline[0.15]*100:>.2f}%\n'+r'$p = 0.15\%$',
+                        xy=(.45, .5), xycoords='axes fraction')
     mean, std = df["p0015", "mean"].to_numpy()*100, df["p0015", "std"].to_numpy()*100     
     axs[0, 0].plot(pdrops, mean, color='red')
     axs[0, 0].fill_between(pdrops, mean-std, mean+std, facecolor='red', alpha=0.2)
 
-    axs[0, 1].axhline(baseline["p005"]*100, color='k', linestyle='--')
-    axs[0, 1].annotate(f'Baseline: {baseline["p005"]*100:>.2f}%\n'+r'$p = 0.50\%$', xy=(.25, 80))  
+    axs[0, 1].axhline(baseline[0.5]*100, color='k', linestyle='--')
+    axs[0, 1].annotate(f'Baseline: {baseline[0.5]*100:>.2f}%\n'+r'$p = 0.50\%$',
+                        xy=(.45, .5), xycoords='axes fraction')  
     mean, std = df["p005", "mean"].to_numpy()*100, df["p005", "std"].to_numpy()*100     
     axs[0, 1].plot(pdrops, mean, color='red')
     axs[0, 1].fill_between(pdrops, mean-std, mean+std, facecolor='red', alpha=0.2)
 
-    axs[1, 0].axhline(baseline["p007"]*100, color='k', linestyle='--')
-    axs[1, 0].annotate(f'Baseline: {baseline["p007"]*100:>.2f}%\n'+r'$p = 0.70\%$', xy=(.25, 80))    
+    axs[1, 0].axhline(baseline[0.7]*100, color='k', linestyle='--')
+    axs[1, 0].annotate(f'Baseline: {baseline[0.7]*100:>.2f}%\n'+r'$p = 0.70\%$',
+                        xy=(.45, .5), xycoords='axes fraction')    
     mean, std = df["p007", "mean"].to_numpy()*100, df["p007", "std"].to_numpy()*100     
     axs[1, 0].plot(pdrops, mean, color='red')
     axs[1, 0].fill_between(pdrops, mean-std, mean+std, facecolor='red', alpha=0.2)
     
-    axs[1, 1].axhline(baseline["p01"]*100, color='k', linestyle='--')
-    axs[1, 1].annotate(f'Baseline: {baseline["p01"]*100:>.2f}%\n'+r'$p = 1.00\%$', xy=(.25, 80))       
+    axs[1, 1].axhline(baseline[1.0]*100, color='k', linestyle='--')
+    axs[1, 1].annotate(f'Baseline: {baseline[1.0]*100:>.2f}%\n'+r'$p = 1.00\%$',
+                        xy=(.45, .5), xycoords='axes fraction')       
     mean, std = df["p01", "mean"].to_numpy()*100, df["p01", "std"].to_numpy()*100     
     axs[1, 1].plot(pdrops, mean, color='red')
     axs[1, 1].fill_between(pdrops, mean-std, mean+std, facecolor='red', alpha=0.2)
@@ -187,10 +199,12 @@ def pdrop_plot():
 def decoder_performance_plot():
 
     df = pd.read_pickle('research/experiments/results/decoder_performance.pkl')
+    df2 = pd.read_pickle('research/experiments/results/naive_performance.pkl')
 
     pfr = df.index.to_numpy()
     pfr_linspace = np.linspace(0.15, 1, 100)
 
+    naive = df2["naive"].to_numpy()*100
     baseline_mean = df["baseline", "mean"].to_numpy()*100
     baseline_std = df["baseline", "std"].to_numpy()*100
     fp_mdnd_mean = df["fp-mdnd", "mean"].to_numpy()*100
@@ -199,10 +213,15 @@ def decoder_performance_plot():
     def monomial(x, a, b):
         return a * x**b
 
+    naive_popt, _ = curve_fit(monomial, pfr, 100-naive)
     baseline_popt, _ = curve_fit(monomial, pfr, 100-baseline_mean)
     fp_mdnd_popt, _ = curve_fit(monomial, pfr, 100-fp_mdnd_mean)
 
     fig, ax = plt.subplots()
+
+    ax.plot(pfr, 100-naive, marker='s', linestyle='', color='red')
+    ax.plot(pfr_linspace, monomial(pfr_linspace, *naive_popt), linestyle='-', color='red',
+            label=f'Naive decoder: {naive_popt[0]:.2f}*p^{naive_popt[1]:.2f}')
 
     ax.errorbar(pfr, 100-baseline_mean, yerr=baseline_std, marker='s', linestyle='', color='limegreen')
     ax.plot(pfr_linspace, monomial(pfr_linspace, *baseline_popt), linestyle='-', color='limegreen',
@@ -213,7 +232,6 @@ def decoder_performance_plot():
             label=f'FP-MDND: {fp_mdnd_popt[0]:.2f}*p^{fp_mdnd_popt[1]:.2f}')
 
     ax.set_xlabel('Physical fault rate [%]')
-    ax.set_xticks(pfr)
     ax.set_ylabel('Logical fault rate [%]')
     ax.tick_params(direction='in', which='both')
     ax.legend()
@@ -258,12 +276,94 @@ def weight_distribution_plot():
     ax.tick_params(direction='in')
     ax.legend()
 
-    plt.show()
+    plt.savefig('research/plots/weight_distribution.pdf')
 
+def weight_clip_plot():
+
+    MDND_LOAD_PATHS = [
+        'research/saves/fp-mdnd/fp_trained_mdnd_model_d3_p0015_nU16_nR3-2022-07-11 06:06:33.570522.pth',
+        'research/saves/fp-mdnd/fp_trained_mdnd_model_d3_p005_nU16_nR3-2022-07-11 07:55:53.452814.pth',
+        'research/saves/fp-mdnd/fp_trained_mdnd_model_d3_p007_nU16_nR3-2022-07-11 10:43:28.346008.pth',
+        'research/saves/fp-mdnd/fp_trained_mdnd_model_d3_p01_nU16_nR3-2022-07-11 12:25:29.338821.pth'
+    ]
+
+    # resistive processing unit
+    rpu_config = InferenceRPUConfig()
+    rpu_config.mapping = MappingParameter(digital_bias=False) # bias term is handled by the analog tile (crossbar)
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    # memristive deep neural decoder
+    model = MDND(
+        input_size=4,
+        hidden_size=16,
+        output_size=2,
+        rpu_config=rpu_config
+    ).to(device)
+
+    fig = plt.figure()
+    gs = fig.add_gridspec(2, 2, hspace=0, wspace=0)
+    axs = gs.subplots(sharex='col', sharey='row')
+
+    # load weights (but use the current RPU config)
+    model.load_state_dict(torch.load(MDND_LOAD_PATHS[0]), load_rpu_config=False)
+    weights = model.get_weights()
+    weights = np.concatenate([t.numpy() for t in weights], axis=None)
+    std = np.std(weights)
+
+    axs[0, 0].hist(weights, bins=20, density=True, histtype='bar',
+                   color='black')
+    axs[0, 0].axvline(-2.5*std, color="black", linestyle="--")
+    axs[0, 0].axvline(2.5*std, color="black", linestyle="--")
+    axs[0, 0].annotate(r'$p = 0.15\%$', xy=(.08, .8), xycoords='axes fraction') 
+
+    # load weights (but use the current RPU config)
+    model.load_state_dict(torch.load(MDND_LOAD_PATHS[1]), load_rpu_config=False)
+    weights = model.get_weights()
+    weights = np.concatenate([t.numpy() for t in weights], axis=None)
+    std = np.std(weights)
+
+    axs[0, 1].hist(weights, bins=20, density=True, histtype='bar',
+                   color='black')
+    axs[0, 1].axvline(-2.5*std, color="black", linestyle="--")
+    axs[0, 1].axvline(2.5*std, color="black", linestyle="--")
+    axs[0, 1].annotate(r'$p = 0.50\%$', xy=(.08, .8), xycoords='axes fraction')
+
+    # load weights (but use the current RPU config)
+    model.load_state_dict(torch.load(MDND_LOAD_PATHS[2]), load_rpu_config=False)
+    weights = model.get_weights()
+    weights = np.concatenate([t.numpy() for t in weights], axis=None)
+    std = np.std(weights)
+
+    axs[1, 0].hist(weights, bins=20, density=True, histtype='bar',
+                   color='black')
+    axs[1, 0].axvline(-2.5*std, color="black", linestyle="--")
+    axs[1, 0].axvline(2.5*std, color="black", linestyle="--")
+    axs[1, 0].annotate(r'$p = 0.70\%$', xy=(.08, .8), xycoords='axes fraction') 
+
+    # load weights (but use the current RPU config)
+    model.load_state_dict(torch.load(MDND_LOAD_PATHS[3]), load_rpu_config=False)
+    weights = model.get_weights()
+    weights = np.concatenate([t.numpy() for t in weights], axis=None)
+    std = np.std(weights)
+
+    axs[1, 1].hist(weights, bins=20, density=True, histtype='bar',
+                   color='black')
+    axs[1, 1].axvline(-2.5*std, color="black", linestyle="--")
+    axs[1, 1].axvline(2.5*std, color="black", linestyle="--")
+    axs[1, 1].annotate(r'$p = 1.00\%$', xy=(.08, .8), xycoords='axes fraction') 
+
+    for ax in axs.flat:
+        ax.tick_params(direction='in', which='both')
+        ax.label_outer()
+    
+    fig.supxlabel('Weight value [-]')
+    fig.supylabel('Normalized counts [-]')
+
+    plt.savefig('research/plots/weight_clip.pdf')
 
 # dac_adc_resolution_plot()
 # prog_noise_scale_plot()
 # pdrop_plot()
-# decoder_performance_plot()
+decoder_performance_plot()
 
-weight_distribution_plot()
+# weight_clip_plot()

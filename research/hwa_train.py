@@ -5,6 +5,7 @@ import json
 import os
 import pickle
 import re
+import numpy as np
 from datetime import datetime
 from torchvision.transforms import Lambda
 
@@ -32,7 +33,7 @@ DATA_PATHS = [
     'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p0085_Nt1M_rnnData_aT1651078854.txt',
     'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p01_Nt1M_rnnData_aT1651079378.txt'
 ]
-MDND_LOAD_PATHS = os.listdir('research/saves/mdnd')
+MDND_LOAD_PATHS = os.listdir('research/saves/fp-mdnd')
 
 # model parameters
 INPUT_SIZE = 4
@@ -63,17 +64,18 @@ rpu_config.forward.out_noise = 0.
 rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=60.0, prog_noise_scale=1.) # rram noise
 rpu_config.modifier = WeightModifierParameter(pdrop=0.1, # defective device probability
                                               enable_during_test=True,
-                                              std_dev=0.005, # 0.5% training noise
+                                              std_dev=0.0, # training noise
                                               type=WeightModifierType.ADD_NORMAL)
 
-for DATA_PATH in DATA_PATHS:
+DATA_PATH = DATA_PATHS[-1]
+
+for std_dev in np.linspace(0, 0.05, 11): # iterate for different std_dev
     
     # regex
     pfr = re.search('p[0-9]*', DATA_PATH).group(0)
     re_pfr = re.compile(pfr)
 
     MDND_LOAD_PATH = list(filter(re_pfr.search, MDND_LOAD_PATHS))[0]
-
 
     # load training and test datasets
     with open(DATA_PATH, 'rb') as f:
@@ -94,6 +96,8 @@ for DATA_PATH in DATA_PATHS:
     )
 
 
+    rpu_config.modifier.std_dev = std_dev
+
     device = "cuda" if torch.cuda.is_available() else "cpu"
     # memristive deep neural decoder
     analog_model = MDND(
@@ -103,7 +107,7 @@ for DATA_PATH in DATA_PATHS:
         rpu_config=rpu_config
     ).to(device)
     # load weights (but use the current RPU config)
-    analog_model.load_state_dict(torch.load(MDND_LOAD_PATH), load_rpu_config=False)
+    analog_model.load_state_dict(torch.load(f'research/saves/fp-mdnd/{MDND_LOAD_PATH}'), load_rpu_config=False)
 
 
     # analog optimizer
@@ -126,7 +130,7 @@ for DATA_PATH in DATA_PATHS:
     time = datetime.now()
     # save ha-mdnd
     torch.save(analog_model.state_dict(),
-               f'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}-{time}.pth')
+               f'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}_std{std_dev:.3f}-{time}.pth')
     # save hwa training parameters
-    with open(f'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}-{time}.json', 'w') as file:
+    with open(f'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}_std{std_dev:.3f}-{time}.json', 'w') as file:
         file.write(json.dumps(trainer.training_state_dict()))
