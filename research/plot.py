@@ -5,6 +5,12 @@ import pickle
 import pandas as pd
 from scipy.optimize import curve_fit
 
+import torch
+from models import MDND
+
+from aihwkit.simulator.configs import InferenceRPUConfig, FloatingPointRPUConfig
+from aihwkit.simulator.configs.utils import MappingParameter
+
 # mpl.rcParams['axes.labelsize'] = 12
 mpl.rcParams["errorbar.capsize"] = 2
 
@@ -216,10 +222,48 @@ def decoder_performance_plot():
 
 def weight_distribution_plot():
 
-    pass
+    MDND_LOAD_PATH = 'research/saves/fp-mdnd/fp_trained_mdnd_model_d3_p01_nU16_nR3-2022-07-11 12:25:29.338821.pth'
+
+    # resistive processing unit
+    rpu_config = InferenceRPUConfig()
+    rpu_config.mapping = MappingParameter(digital_bias=False) # bias term is handled by the analog tile (crossbar)
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    # memristive deep neural decoder
+    model = MDND(
+        input_size=4,
+        hidden_size=16,
+        output_size=2,
+        rpu_config=rpu_config
+    ).to(device)
+    # load weights (but use the current RPU config)
+    model.load_state_dict(torch.load(MDND_LOAD_PATH), load_rpu_config=False)
+
+    weights = model.get_weights()
+    weights = np.concatenate([t.numpy() for t in weights], axis=None)
+    std = np.std(weights)
+
+    fig, ax = plt.subplots()
+    ax.hist(weights, bins=20, density=True, histtype='bar',
+            color='black')
+    ax.axvline(-std, color="r", linestyle="--", label=r"$\sigma$")
+    ax.axvline(std, color="r", linestyle="--")
+    ax.axvline(-2*std, color="g", linestyle="--", label=r"2$\sigma$")
+    ax.axvline(2*std, color="g", linestyle="--")
+    ax.axvline(-3*std, color="b", linestyle="--", label=r"3$\sigma$")
+    ax.axvline(3*std, color="b", linestyle="--")
+
+    ax.set_xlabel('Weight value [-]')
+    ax.set_ylabel('Normalized counts [-]')
+    ax.tick_params(direction='in')
+    ax.legend()
+
+    plt.show()
 
 
-dac_adc_resolution_plot()
-prog_noise_scale_plot()
-pdrop_plot()
-decoder_performance_plot()
+# dac_adc_resolution_plot()
+# prog_noise_scale_plot()
+# pdrop_plot()
+# decoder_performance_plot()
+
+weight_distribution_plot()

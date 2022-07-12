@@ -32,7 +32,7 @@ def decoder_performance_run():
         'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p0085_Nt1M_rnnData_aT1651078854.txt',
         'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p01_Nt1M_rnnData_aT1651079378.txt'
     ]
-    DND_LOAD_PATHS = os.listdir('research/saves/dnd')
+    DND_LOAD_PATHS = list(filter(lambda s: s[-3:] == 'pth', os.listdir('research/saves/dnd')))
     MDND_LOAD_PATHS = os.listdir('research/saves/fp-mdnd')
 
     # model parameters
