@@ -10,6 +10,7 @@ from models import MDND
 
 from aihwkit.simulator.configs import InferenceRPUConfig, FloatingPointRPUConfig
 from aihwkit.simulator.configs.utils import MappingParameter
+from aihwkit.inference import RRAMLikeNoiseModel
 
 # mpl.rcParams['axes.labelsize'] = 12
 mpl.rcParams["errorbar.capsize"] = 2
@@ -32,6 +33,23 @@ def sig_prog():
 
     plt.savefig('research/plots/sig_prog.pdf')
 
+def gaussian_noise_plot():
+
+    G_T = np.linspace(0.3, 1.0, 100)
+    G = G_T*200 # G_MAX = 200 \mu S
+    S_RRAM = 0.0771 + 1.036*G_T
+
+    fig, ax = plt.subplots()
+
+    ax.plot(G_T, S_RRAM/G, 'b-', label=r'RRAM (3iT)')
+    ax.axhline(0.006, color="black", linestyle="--")
+    ax.annotate("Relative training noise: 0.6%", xy=(.5, .5), xycoords="axes fraction")
+    ax.set_xlabel(r'$g_T = g / g_{max}$ [-]')
+    ax.set_ylabel(r'$\sigma_{PROG} / g$ [-]')
+    ax.tick_params(direction='in', which='both')
+    ax.legend()
+
+    plt.savefig('research/plots/gaussian_noise.pdf')
 
 def sig_read():
 
@@ -416,10 +434,133 @@ def training_pdrop_plot():
     plt.show()
 
 def weight_hwaclip_plot():
-    pass
+    
+    MDND_LOAD_PATHS = [
+        
+    ]
 
-def conductances():
-    pass
+    # resistive processing unit
+    rpu_config = InferenceRPUConfig()
+    rpu_config.mapping = MappingParameter(digital_bias=False) # bias term is handled by the analog tile (crossbar)
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    # memristive deep neural decoder
+    model = MDND(
+        input_size=4,
+        hidden_size=16,
+        output_size=2,
+        rpu_config=rpu_config
+    ).to(device)
+
+    fig = plt.figure()
+    gs = fig.add_gridspec(2, 2, hspace=0, wspace=0)
+    axs = gs.subplots(sharex='col', sharey='row')
+
+    # load weights (but use the current RPU config)
+    model.load_state_dict(torch.load(MDND_LOAD_PATHS[0]), load_rpu_config=False)
+    weights = model.get_weights()
+    weights = np.concatenate([t.numpy() for t in weights], axis=None)
+    std = np.std(weights)
+
+    axs[0, 0].hist(weights, bins=20, density=True, histtype='bar',
+                   color='black')
+    axs[0, 0].axvline(-2.5*std, color="black", linestyle="--")
+    axs[0, 0].axvline(2.5*std, color="black", linestyle="--")
+    axs[0, 0].annotate(r'$p = 0.15\%$', xy=(.08, .8), xycoords='axes fraction') 
+
+    # load weights (but use the current RPU config)
+    model.load_state_dict(torch.load(MDND_LOAD_PATHS[1]), load_rpu_config=False)
+    weights = model.get_weights()
+    weights = np.concatenate([t.numpy() for t in weights], axis=None)
+    std = np.std(weights)
+
+    axs[0, 1].hist(weights, bins=20, density=True, histtype='bar',
+                   color='black')
+    axs[0, 1].axvline(-2.5*std, color="black", linestyle="--")
+    axs[0, 1].axvline(2.5*std, color="black", linestyle="--")
+    axs[0, 1].annotate(r'$p = 0.50\%$', xy=(.08, .8), xycoords='axes fraction')
+
+    # load weights (but use the current RPU config)
+    model.load_state_dict(torch.load(MDND_LOAD_PATHS[2]), load_rpu_config=False)
+    weights = model.get_weights()
+    weights = np.concatenate([t.numpy() for t in weights], axis=None)
+    std = np.std(weights)
+
+    axs[1, 0].hist(weights, bins=20, density=True, histtype='bar',
+                   color='black')
+    axs[1, 0].axvline(-2.5*std, color="black", linestyle="--")
+    axs[1, 0].axvline(2.5*std, color="black", linestyle="--")
+    axs[1, 0].annotate(r'$p = 0.70\%$', xy=(.08, .8), xycoords='axes fraction') 
+
+    # load weights (but use the current RPU config)
+    model.load_state_dict(torch.load(MDND_LOAD_PATHS[3]), load_rpu_config=False)
+    weights = model.get_weights()
+    weights = np.concatenate([t.numpy() for t in weights], axis=None)
+    std = np.std(weights)
+
+    axs[1, 1].hist(weights, bins=20, density=True, histtype='bar',
+                   color='black')
+    axs[1, 1].axvline(-2.5*std, color="black", linestyle="--")
+    axs[1, 1].axvline(2.5*std, color="black", linestyle="--")
+    axs[1, 1].annotate(r'$p = 1.00\%$', xy=(.08, .8), xycoords='axes fraction') 
+
+    for ax in axs.flat:
+        ax.tick_params(direction='in', which='both')
+        ax.label_outer()
+    
+    fig.supxlabel('Weight value [-]')
+    fig.supylabel('Normalized counts [-]')
+
+    plt.savefig('research/plots/weight_hwaclip.pdf')
+
+def conductances_plot():
+    
+    MDND_LOAD_PATH = 'research/saves/fp-mdnd/fp_trained_mdnd_model_d3_p01_nU16_nR3-2022-07-11 12:25:29.338821.pth'
+
+    # model parameters
+    INPUT_SIZE = 4
+    OUTPUT_SIZE = 2
+    HIDDEN_SIZE = 16
+
+    # resistive processing unit
+    rpu_config = InferenceRPUConfig()
+    rpu_config.mapping = MappingParameter(digital_bias=False) # bias term is handled by the analog tile (crossbar)
+    rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=60.0, prog_noise_scale=1.) # rram noise
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    # memristive deep neural decoder
+    analog_model = MDND(
+        input_size=INPUT_SIZE,
+        hidden_size=HIDDEN_SIZE,
+        output_size=OUTPUT_SIZE,
+        rpu_config=rpu_config
+    ).to(device)
+    # load weights (but use the current RPU config)
+    analog_model.load_state_dict(torch.load(MDND_LOAD_PATH), load_rpu_config=False)
+
+    conductances = analog_model.get_conductances()
+    rnn_Gpos = conductances[0][0].numpy().T
+    rnn_Gneg = conductances[0][1].numpy().T
+    y, x = rnn_Gpos.shape
+    vmin = min(rnn_Gpos.min(), rnn_Gneg.min())
+    vmax = max(rnn_Gpos.max(), rnn_Gneg.max())
+
+    fig, axs = plt.subplots(1, 2, sharey=True, constrained_layout=True)
+
+    pcm0 = axs[0].pcolormesh(np.arange(x), np.arange(y), rnn_Gpos, cmap='Blues',
+                            vmin=vmin, vmax=vmax)
+    cbar0 = fig.colorbar(pcm0, ax=axs[0])
+    axs[0].set_xlabel(r'$j$')
+    axs[0].set_ylabel(r'$i$')
+    cbar0.set_label(r'$g_{ij}^{+}$ [$\mu$S]')
+
+    pcm1 = axs[1].pcolormesh(np.arange(x), np.arange(y), rnn_Gneg, cmap='Reds',
+                            vmin=vmin, vmax=vmax)
+    cbar1 = fig.colorbar(pcm1, ax=axs[1])
+    axs[1].set_xlabel(r'$j$')
+    cbar1.set_label(r'$g_{ij}^{-}$ [$\mu$S]')
+
+    plt.savefig('research/plots/fp-conductances.pdf')
 
 # dac_adc_resolution_plot()
 # prog_noise_scale_plot()
@@ -427,3 +568,5 @@ def conductances():
 # decoder_performance_plot()
 
 # weight_clip_plot()
+
+# conductances_plot()

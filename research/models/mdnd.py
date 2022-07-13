@@ -6,6 +6,7 @@ from torch import Tensor
 from aihwkit.exceptions import ModuleError
 from aihwkit.nn import AnalogRNN, AnalogLinear, AnalogSequential
 from aihwkit.nn.modules.base import RPUConfigAlias, AnalogModuleBase
+from aihwkit.simulator.tiles import InferenceTile
 
 
 class MDND(AnalogSequential):
@@ -81,6 +82,18 @@ class MDND(AnalogSequential):
             if isinstance(module, AnalogModuleBase):
                 weights.extend(module.get_weights())
         return weights
+
+    def get_conductances(self):
+        conductances = []
+        for module in self.modules():
+            if isinstance(module, AnalogModuleBase):
+                for analog_tile in module.analog_tiles():
+                    if isinstance(analog_tile, InferenceTile):
+                        target_conductances, params = analog_tile.noise_model.g_converter.convert_to_conductances(
+                            Tensor(analog_tile.tile.get_weights())
+                        )
+                        conductances.append(target_conductances)
+        return conductances                  
 
     def forward(self, inputs: Tensor):
         """Compute the forward pass."""
