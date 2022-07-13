@@ -18,11 +18,17 @@ $ brew install openblas
 $ pip install cmake scikit-build torch pybind11
 ```
 
-Then, the library can be compiled by running:
+Compile the library:
 ```
-$ python setup.py build_ext --inplace
+$ mkdir build
+$ cd build
+build$ cmake ..
+build$ make
 ```
-
+Move the compiled library:
+```
+$ mv build/src/aihwkit/simulator/rpu_base.* src/aihwkit/simulator
+```
 Update the `PYTHONPATH` for the session (has to be run for every session):
 ```
 $ export PYTHONPATH=src/
