@@ -562,6 +562,17 @@ def conductances_plot():
 
     plt.savefig('research/plots/fp-conductances.pdf')
 
+def hwa_lr_losses_plot():
+
+    fig, ax = plt.subplots()
+
+    df = pd.read_pickle('research/experiments/results/training/hwa_lr_losses.pkl')
+    train_currents = df.index.to_numpy()
+
+    for lr in [1e-5, 1e-4, 1e-3, 1e-2]:
+        train_losses = df[lr].to_numpy()
+        ax.plot(train_currents, train_losses, label="lr = {lr:.0e}")
+
 # dac_adc_resolution_plot()
 # prog_noise_scale_plot()
 # pdrop_plot()
