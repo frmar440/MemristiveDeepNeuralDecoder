@@ -95,8 +95,8 @@ class Trainer(Tester):
 
         # stats
         self.train_losses = []
-        self.current = 0
-        self.train_currents = []
+        self.train_batches = []
+        self.current_batch = 0
     
 
     def __call__(self, model) -> None:
@@ -152,5 +152,5 @@ class Trainer(Tester):
                 loss, current = loss.item(), batch * batch_size
                 print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
                 self.train_losses.append(loss)
-                self.train_currents.append(self.current)
-                self.current += 100 * batch_size
+                self.train_batches.append(self.current_batch)
+                self.current_batch += 100

@@ -127,7 +127,7 @@ for i, learning_rate in enumerate(LEARNING_RATES):
 
     if i == 0:
         # dataframe init
-        df = pd.DataFrame(index=trainer.train_currents, columns=LEARNING_RATES, dtype='float64')
+        df = pd.DataFrame(index=trainer.train_batches, columns=LEARNING_RATES, dtype='float64')
     
     df[learning_rate] = trainer.train_losses
 
