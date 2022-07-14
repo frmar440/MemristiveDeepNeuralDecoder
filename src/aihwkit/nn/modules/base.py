@@ -460,6 +460,7 @@ class AnalogModuleBase(Module):
                                           f"with {analog_tile.rpu_config.__class__.__name__}")
                     analog_state['rpu_config'] = analog_tile.rpu_config
                     analog_state['noise_model'] = analog_tile.rpu_config.noise_model
+                    analog_state['drift_compensation'] = analog_tile.rpu_config.drift_compensation
                 analog_tile.__setstate__(analog_state)
 
             elif strict:

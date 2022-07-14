@@ -92,6 +92,10 @@ class Trainer(Tester):
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.optimizer = optimizer
+
+        # stats
+        self.train_losses = []
+        self.train_currents = []
     
 
     def __call__(self, model) -> None:
@@ -146,3 +150,5 @@ class Trainer(Tester):
             if batch % 100 == 0:
                 loss, current = loss.item(), batch * batch_size
                 print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+                self.train_losses.append(loss)
+                self.train_currents.append(current)

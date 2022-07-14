@@ -258,7 +258,7 @@ def decoder_performance_plot():
 
 def weight_distribution_plot():
 
-    MDND_LOAD_PATH = 'research/saves/fp-mdnd/fp_trained_mdnd_model_d3_p01_nU16_nR3-2022-07-11 12:25:29.338821.pth'
+    MDND_LOAD_PATH = 'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_p01_nU16_pdrop0.000-2022-07-13 04:48:07.121802.pth'
 
     # resistive processing unit
     rpu_config = InferenceRPUConfig()
@@ -294,7 +294,7 @@ def weight_distribution_plot():
     ax.tick_params(direction='in')
     ax.legend()
 
-    plt.savefig('research/plots/weight_distribution.pdf')
+    plt.show()
 
 def weight_clip_plot():
 
@@ -394,7 +394,7 @@ def training_noise_plot():
     ax.axhline(fp_mdnd[1.0]*100, color='k', linestyle=':')
     ax.annotate(f'Baseline: {baseline[1.0]*100:>.2f}%\n'
                 f'FP-MDND: {fp_mdnd[1.0]*100:>.2f}%\n'
-                r'$p = 0.15\%$',
+                r'$p = 1.00\%$',
                 xy=(.45, .5), xycoords='axes fraction')
     mean, std = df["p01", "mean"].to_numpy()*100, df["p01", "std"].to_numpy()*100     
     ax.plot(std_dev, mean, color='purple')
@@ -421,7 +421,7 @@ def training_pdrop_plot():
     ax.axhline(fp_mdnd[1.0]*100, color='k', linestyle=':')
     ax.annotate(f'Baseline: {baseline[1.0]*100:>.2f}%\n'
                 f'FP-MDND: {fp_mdnd[1.0]*100:>.2f}%\n'
-                r'$p = 0.15\%$',
+                r'$p = 1.00\%$',
                 xy=(.45, .5), xycoords='axes fraction')
     mean, std = df["p01", "mean"].to_numpy()*100, df["p01", "std"].to_numpy()*100     
     ax.plot(pdrop, mean, color='red')
@@ -436,7 +436,7 @@ def training_pdrop_plot():
 def weight_hwaclip_plot():
     
     MDND_LOAD_PATHS = [
-        
+        'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_p01_nU16_pdrop0.000-2022-07-13 04:48:07.121802.pth'
     ]
 
     # resistive processing unit
@@ -570,3 +570,8 @@ def conductances_plot():
 # weight_clip_plot()
 
 # conductances_plot()
+
+# training_noise_plot()
+# training_pdrop_plot()
+
+weight_distribution_plot()
