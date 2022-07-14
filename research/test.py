@@ -29,9 +29,23 @@ INPUT_SIZE = 4
 OUTPUT_SIZE = 2
 HIDDEN_SIZE = 16
 
-# resistive processing unit
+# resistive processing unit (for hwa training)
 rpu_config = InferenceRPUConfig()
-rpu_config.mapping = MappingParameter(digital_bias=False) # bias term is handled by the analog tile (crossbar)
+rpu_config.drift_compensation = None
+rpu_config.mapping = MappingParameter(digital_bias=False, # bias term is handled by the analog tile (crossbar)
+                                      max_input_size=512,
+                                      max_output_size=512)
+# training
+rpu_config.clip = WeightClipParameter(sigma=2.5, type=WeightClipType.LAYER_GAUSSIAN) # weight clipping
+# training and inference
+rpu_config.forward.inp_res = 1/256.  # 8-bit DAC discretization.
+rpu_config.forward.out_res = 1/256.  # 8-bit ADC discretization.
+rpu_config.forward.out_noise = 0.
+rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=60.0, prog_noise_scale=1.) # rram noise
+rpu_config.modifier = WeightModifierParameter(pdrop=0.1, # defective device probability
+                                              enable_during_test=True,
+                                              std_dev=0.005, # training noise
+                                              type=WeightModifierType.REL_NORMAL)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 # memristive deep neural decoder
@@ -42,7 +56,9 @@ analog_model = MDND(
     rpu_config=rpu_config
 ).to(device)
 # load weights (but use the current RPU config)
-analog_model.load_state_dict(torch.load(MDND_LOAD_PATH), load_rpu_config=False)
+analog_model.load_state_dict(torch.load(MDND_LOAD_PATH))
 
-conductances = analog_model.get_conductances()
+analog_model.load_rpu_config(rpu_config)
+
+# conductances = analog_model.get_conductances()
 print("")

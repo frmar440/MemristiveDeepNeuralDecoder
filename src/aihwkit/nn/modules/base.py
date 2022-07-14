@@ -15,6 +15,7 @@ from typing import (
     Any, Dict, List, Optional, Tuple, NamedTuple, Union,
     Generator, TYPE_CHECKING
 )
+from copy import deepcopy
 
 from torch import Tensor, no_grad, ones, float32
 from torch.nn import Module, Parameter
@@ -484,6 +485,29 @@ class AnalogModuleBase(Module):
         # remove the missing keys of the helper parameters
         for key in rm_keys:
             missing_keys.remove(key)
+
+    def _load_from_rpu_config(self, rpu_config):
+            """Copy parameters from `rpu_config` into this module."""
+
+            state_dict = self.state_dict()
+
+            for name, analog_tile in list(self.named_analog_tiles()):
+                key = self.ANALOG_STATE_PREFIX + name
+                if key not in state_dict:  # legacy
+                    key = 'analog_tile_state'
+
+                if key in state_dict:
+                    analog_state = state_dict.pop(key).copy()
+
+                    if rpu_config.__class__ != analog_state['rpu_config'].__class__:
+                        raise ModuleError("RPU config mismatch during loading: "
+                                        "Tried to replace "
+                                        f"{analog_state['rpu_config'].__class__.__name__} "
+                                        f"with {rpu_config.__class__.__name__}")
+                    analog_state['rpu_config'] = rpu_config
+                    analog_state['noise_model'] = rpu_config.noise_model
+                    analog_state['drift_compensation'] = rpu_config.drift_compensation
+                analog_tile.__setstate__(analog_state)
 
     def state_dict(
             self,

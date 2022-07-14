@@ -76,6 +76,9 @@ class MDND(AnalogSequential):
 
         return analog_module
 
+    def load_rpu_config(self, rpu_config):
+        self._apply_to_analog(lambda m: m._load_from_rpu_config(rpu_config))
+
     def get_weights(self):
         weights = []
         for module in self.modules():

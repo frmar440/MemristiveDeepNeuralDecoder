@@ -9,7 +9,8 @@ from aihwkit.nn import AnalogSequential
 class Tester:
     """Implementation of test loop.
     """
-    def __init__(self, test_data, batch_size=64, loss_fn=None, batch_first=False) -> None:
+    def __init__(self, test_data, batch_size=64, loss_fn=None, batch_first=False,
+                 max_accuracy=False) -> None:
         """Test neural network model.
         Args:
             model (torch.nn.Module): neural network model.
@@ -25,6 +26,9 @@ class Tester:
         self.batch_size = batch_size
         self.loss_fn = loss_fn
         self.batch_first = batch_first
+
+        self.max_accuracy = 0. if max_accuracy else None
+        self.max_state_dict = None
 
         self.reset_stats()
     
@@ -62,7 +66,10 @@ class Tester:
         self.average_losses.append(test_loss)
         self.accuracies.append(correct)
         print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f}\n")
-    
+
+        if self.max_accuracy is not None and self.max_accuracy < correct:
+            self.max_accuracy = correct
+            self.max_state_dict = model.state_dict()
     
     def reset_stats(self):
         self.accuracies = []
@@ -73,7 +80,9 @@ class Trainer(Tester):
     """Full implementation of optimization loop.
     """
     def __init__(self, training_data, test_data, learning_rate=1e-3, batch_size=64, epochs=10,
-        loss_fn=None, optimizer=None, batch_first=False) -> None:
+        loss_fn=None, optimizer=None, batch_first=False,
+        training_rpu_config=None, test_rpu_config=None,
+        max_accuracy=False) -> None:
         """Constructor.
         Args:
             model (torch.nn.Module): neural network model.
@@ -85,7 +94,7 @@ class Trainer(Tester):
             batch_first (bool, optinal): whether batch_size is first dimension or not. Defaults to True.
                                          Must be False for AnalogRNN.
         """
-        super().__init__(test_data, batch_size, loss_fn, batch_first)
+        super().__init__(test_data, batch_size, loss_fn, batch_first, max_accuracy)
         # wrap an iterable around the Dataset to enable easy access to the samples
         self.training_dataloader = DataLoader(training_data, batch_size=batch_size, shuffle=True)
 
@@ -93,10 +102,8 @@ class Trainer(Tester):
         self.epochs = epochs
         self.optimizer = optimizer
 
-        # stats
-        self.train_losses = []
-        self.train_batches = []
-        self.current_batch = 0
+        self.training_rpu_config = training_rpu_config
+        self.test_rpu_config = test_rpu_config
     
 
     def __call__(self, model) -> None:
@@ -107,8 +114,15 @@ class Trainer(Tester):
         time_init = time()
         for t in range(self.epochs):
             print(f"Epoch {t+1}\n-------------------------------")
+
+            if isinstance(model, AnalogSequential):
+                model.load_rpu_config(self.training_rpu_config)
             self.training_loop(model)
+
+            if isinstance(model, AnalogSequential):
+                model.load_rpu_config(self.test_rpu_config)
             self.test_loop(model)
+
             time_now = time() - time_init
             print(f"Time: {time_now:>4f} s\n")
         print("Done!")
@@ -151,6 +165,3 @@ class Trainer(Tester):
             if batch % 100 == 0:
                 loss, current = loss.item(), batch * batch_size
                 print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
-                self.train_losses.append(loss)
-                self.train_batches.append(self.current_batch)
-                self.current_batch += 100

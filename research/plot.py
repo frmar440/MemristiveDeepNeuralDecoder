@@ -571,7 +571,7 @@ def hwa_lr_losses_plot():
 
     for lr in [1e-5, 1e-4, 1e-3, 1e-2]:
         train_losses = df[lr].to_numpy()
-        ax.plot(train_batches, train_losses, label="lr = {lr:.0e}")
+        ax.plot(train_batches[::10], train_losses[::10], label=f"lr = {lr:.0e}")
 
     ax.set_xlabel("Batch [-]")
     ax.set_ylabel("Loss [-]")
@@ -591,4 +591,6 @@ def hwa_lr_losses_plot():
 # training_noise_plot()
 # training_pdrop_plot()
 
-weight_distribution_plot()
+# weight_distribution_plot()
+
+hwa_lr_losses_plot()
