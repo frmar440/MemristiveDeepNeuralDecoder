@@ -75,7 +75,7 @@ test_rpu_config.mapping = MappingParameter(digital_bias=False, # bias term is ha
 test_rpu_config.forward.inp_res = 1/256.  # 8-bit DAC discretization.
 test_rpu_config.forward.out_res = 1/256.  # 8-bit ADC discretization.
 test_rpu_config.forward.out_noise = 0.
-test_rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=60.0, prog_noise_scale=1.) # rram noise (weights programmation is test mode)
+test_rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=60.0, prog_noise_scale=1.) # rram noise (weights programmation in test mode)
 test_rpu_config.modifier = WeightModifierParameter(pdrop=0.1, # defective device probability
                                               enable_during_test=True)
 

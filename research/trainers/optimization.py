@@ -74,10 +74,10 @@ class Tester:
         if self.max_accuracy is not None and self.max_accuracy < correct:
             self.max_accuracy = correct
             self.max_state_dict = model.state_dict()
-        
-        # set reference weights (for training loop)
+
         if isinstance(model, AnalogSequential):
-            model.set_reference_combined_weights()
+            model.unprogram_analog_weights()
+        
     
     def reset_stats(self):
         self.accuracies = []
@@ -144,7 +144,7 @@ class Trainer(Tester):
         """Iterate over the training dataset and try to converge to optimal parameters.
         """
         size = len(self.training_dataloader.dataset)
-        num_batches = len(self.test_dataloader)
+        num_batches = len(self.training_dataloader)
 
         step = floor(num_batches / n_step)
 

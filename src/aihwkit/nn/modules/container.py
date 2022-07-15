@@ -238,6 +238,11 @@ class AnalogSequential(Sequential):
 
         self._apply_to_analog(lambda m: m.program_analog_weights())
 
+    def unprogram_analog_weights(self) -> None:
+        """Unprogram all analog inference layers of a given model."""
+
+        self._apply_to_analog(lambda m: m.unprogram_analog_weights())
+
     @classmethod
     def from_digital(cls, module: Sequential,  # pylint: disable=unused-argument
                      *args: Any,

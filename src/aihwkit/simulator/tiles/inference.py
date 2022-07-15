@@ -114,8 +114,10 @@ class InferenceTile(AnalogTile):
         if not from_reference or self.reference_combined_weights is None:
             self.reference_combined_weights = Tensor(self.tile.get_weights())
 
+        self.unprogrammed_weights = Tensor(self.tile.get_weights())
+
         self.programmed_weights, self.nu_drift_list = self.noise_model.apply_programming_noise(
-            self.reference_combined_weights)
+            self.unprogrammed_weights)
 
         self.tile.set_weights(self.programmed_weights.numpy())
 
@@ -124,11 +126,9 @@ class InferenceTile(AnalogTile):
             self.drift_baseline = self.drift_compensation.init_baseline(forward_output)
 
     @no_grad()
-    def set_reference_weights(self):
-        if self.reference_combined_weights is None:
-            self.reference_combined_weights = Tensor(self.tile.get_weights())
+    def unprogram_weights(self):
         
-        self.tile.set_weights(self.reference_combined_weights.numpy())
+        self.tile.set_weights(self.unprogrammed_weights.numpy())
 
     @no_grad()
     def drift_weights(

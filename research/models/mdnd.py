@@ -86,10 +86,6 @@ class MDND(AnalogSequential):
                 weights.extend(module.get_weights())
         return weights
 
-    def set_reference_combined_weights(self):
-        """Set reference combined weights of all analog inference layers."""
-        self._apply_to_analog(lambda m: m.set_reference_combined_weights())
-
     def get_conductances(self):
         conductances = []
         for module in self.modules():

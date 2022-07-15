@@ -556,11 +556,11 @@ class AnalogModuleBase(Module):
             if isinstance(analog_tile, InferenceTile):
                 analog_tile.program_weights()
     
-    def set_reference_combined_weights(self) -> None:
-        """Set the reference weights"""
+    def unprogram_analog_weights(self) -> None:
+        """Unprogram the analog weights"""
         for analog_tile in self.analog_tiles():
             if isinstance(analog_tile, InferenceTile):
-                analog_tile.set_reference_weights()
+                analog_tile.unprogram_weights()
 
     def extra_repr(self) -> str:
         """Set the extra representation of the module.
