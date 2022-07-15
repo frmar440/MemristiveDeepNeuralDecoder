@@ -60,7 +60,7 @@ training_rpu_config.clip = WeightClipParameter(sigma=2.5, type=WeightClipType.LA
 training_rpu_config.forward.inp_res = 1/256.  # 8-bit DAC discretization.
 training_rpu_config.forward.out_res = 1/256.  # 8-bit ADC discretization.
 training_rpu_config.forward.out_noise = 0.
-training_rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=60.0, prog_noise_scale=1.) # rram noise
+training_rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=60.0, prog_noise_scale=1.) # rram noise (no weights programmation in training mode)
 training_rpu_config.modifier = WeightModifierParameter(pdrop=0.1, # defective device probability
                                               enable_during_test=True,
                                               std_dev=0.005, # training noise
@@ -75,11 +75,9 @@ test_rpu_config.mapping = MappingParameter(digital_bias=False, # bias term is ha
 test_rpu_config.forward.inp_res = 1/256.  # 8-bit DAC discretization.
 test_rpu_config.forward.out_res = 1/256.  # 8-bit ADC discretization.
 test_rpu_config.forward.out_noise = 0.
-test_rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=60.0, prog_noise_scale=1.) # rram noise
+test_rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=60.0, prog_noise_scale=1.) # rram noise (weights programmation is test mode)
 test_rpu_config.modifier = WeightModifierParameter(pdrop=0.1, # defective device probability
-                                              enable_during_test=True,
-                                              std_dev=0.005, # training noise
-                                              type=WeightModifierType.REL_NORMAL)
+                                              enable_during_test=True)
 
 DATA_PATH = DATA_PATHS[-1]
 
@@ -216,7 +214,7 @@ for pdrop in np.linspace(0.0, 0.3, 7): # iterate for different pdrop
         max_accuracy=True
     )
     # hwa training
-    trainer(analog_model)
+    trainer(analog_model, n_step=4)
 
 
     time = datetime.now()

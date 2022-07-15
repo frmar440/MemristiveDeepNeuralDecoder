@@ -124,6 +124,13 @@ class InferenceTile(AnalogTile):
             self.drift_baseline = self.drift_compensation.init_baseline(forward_output)
 
     @no_grad()
+    def set_reference_weights(self):
+        if self.reference_combined_weights is None:
+            self.reference_combined_weights = Tensor(self.tile.get_weights())
+        
+        self.tile.set_weights(self.reference_combined_weights.numpy())
+
+    @no_grad()
     def drift_weights(
             self,
             t_inference: float = 0.0

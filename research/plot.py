@@ -431,7 +431,7 @@ def training_pdrop_plot():
     ax.set_ylabel('Decoder test accuracy [%]')
     ax.tick_params(direction='in')
 
-    plt.show()
+    plt.savefig('research/plots/training_pdrop_plot1.pdf')
 
 def weight_hwaclip_plot():
     
@@ -589,8 +589,8 @@ def hwa_lr_losses_plot():
 # conductances_plot()
 
 # training_noise_plot()
-# training_pdrop_plot()
+training_pdrop_plot()
 
 # weight_distribution_plot()
 
-hwa_lr_losses_plot()
+# hwa_lr_losses_plot()

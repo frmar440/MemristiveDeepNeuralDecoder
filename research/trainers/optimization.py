@@ -1,6 +1,7 @@
 """Training and test loops
 """
 from time import time
+from math import floor
 
 import torch
 from torch.utils.data import DataLoader
@@ -10,7 +11,7 @@ class Tester:
     """Implementation of test loop.
     """
     def __init__(self, test_data, batch_size=64, loss_fn=None, batch_first=False,
-                 max_accuracy=False) -> None:
+            test_rpu_config=None, max_accuracy=False) -> None:
         """Test neural network model.
         Args:
             model (torch.nn.Module): neural network model.
@@ -27,17 +28,19 @@ class Tester:
         self.loss_fn = loss_fn
         self.batch_first = batch_first
 
+        self.test_rpu_config = test_rpu_config
+
         self.max_accuracy = 0. if max_accuracy else None
         self.max_state_dict = None
 
         self.reset_stats()
     
 
-    def __call__(self, model, inference=False) -> None:
-        self.test_loop(model, inference)
+    def __call__(self, model) -> None:
+        self.test_loop(model)
 
 
-    def test_loop(self, model, inference=False) -> None:
+    def test_loop(self, model) -> None:
         """Iterate over the test dataset to check if model performance is improving.
         """
         size = len(self.test_dataloader.dataset)
@@ -45,8 +48,9 @@ class Tester:
         test_loss, correct = 0, 0
 
         model.eval()
-        # program and drift weights only during inference
-        if inference and isinstance(model, AnalogSequential):
+        # load test_rpu_config, program and drift weights
+        if isinstance(model, AnalogSequential):
+            model.load_rpu_config(self.test_rpu_config)
             model.program_analog_weights()
             model.drift_analog_weights()
 
@@ -70,6 +74,10 @@ class Tester:
         if self.max_accuracy is not None and self.max_accuracy < correct:
             self.max_accuracy = correct
             self.max_state_dict = model.state_dict()
+        
+        # set reference weights (for training loop)
+        if isinstance(model, AnalogSequential):
+            model.set_reference_combined_weights()
     
     def reset_stats(self):
         self.accuracies = []
@@ -94,7 +102,7 @@ class Trainer(Tester):
             batch_first (bool, optinal): whether batch_size is first dimension or not. Defaults to True.
                                          Must be False for AnalogRNN.
         """
-        super().__init__(test_data, batch_size, loss_fn, batch_first, max_accuracy)
+        super().__init__(test_data, batch_size, loss_fn, batch_first, test_rpu_config, max_accuracy)
         # wrap an iterable around the Dataset to enable easy access to the samples
         self.training_dataloader = DataLoader(training_data, batch_size=batch_size, shuffle=True)
 
@@ -103,10 +111,9 @@ class Trainer(Tester):
         self.optimizer = optimizer
 
         self.training_rpu_config = training_rpu_config
-        self.test_rpu_config = test_rpu_config
     
 
-    def __call__(self, model) -> None:
+    def __call__(self, model, n_step=1) -> None:
         """Optimization loop.
         Returns:
             torch.nn.Module: trained neural network model.
@@ -114,15 +121,7 @@ class Trainer(Tester):
         time_init = time()
         for t in range(self.epochs):
             print(f"Epoch {t+1}\n-------------------------------")
-
-            if isinstance(model, AnalogSequential):
-                model.load_rpu_config(self.training_rpu_config)
-            self.training_loop(model)
-
-            if isinstance(model, AnalogSequential):
-                model.load_rpu_config(self.test_rpu_config)
-            self.test_loop(model)
-
+            self.training_loop(model, n_step)
             time_now = time() - time_init
             print(f"Time: {time_now:>4f} s\n")
         print("Done!")
@@ -141,14 +140,21 @@ class Trainer(Tester):
         return state_dict
 
 
-    def training_loop(self, model) -> None:
+    def training_loop(self, model, n_step=1) -> None:
         """Iterate over the training dataset and try to converge to optimal parameters.
         """
         size = len(self.training_dataloader.dataset)
+        num_batches = len(self.test_dataloader)
+
+        step = floor(num_batches / n_step)
 
         model.train()
 
+        if isinstance(model, AnalogSequential):
+            model.load_rpu_config(self.training_rpu_config)
+
         for batch, (X, y) in enumerate(self.training_dataloader): # batch_first in DataLoader
+            batch += 1
             # Compute prediction and loss
             batch_size = len(X)
             if not self.batch_first:
@@ -165,3 +171,6 @@ class Trainer(Tester):
             if batch % 100 == 0:
                 loss, current = loss.item(), batch * batch_size
                 print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+            
+            if batch % step == 0:
+                self.test_loop(model)
