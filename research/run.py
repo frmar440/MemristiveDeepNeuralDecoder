@@ -8,5 +8,5 @@ from experiments import (
 # pdrop_run()
 # decoder_performance_run()
 
-training_noise_run()
+# training_noise_run()
 training_pdrop_run()
