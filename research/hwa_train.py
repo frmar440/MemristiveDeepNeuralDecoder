@@ -221,7 +221,7 @@ for pdrop in np.linspace(0.0, 0.3, 7): # iterate for different pdrop
 
     time = datetime.now()
     # save ha-mdnd
-    torch.save(analog_model.max_state_dict,
+    torch.save(trainer.max_state_dict,
                f'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}_pdrop{pdrop:.3f}-{time}.pth')
     # save hwa training parameters
     with open(f'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}_pdrop{pdrop:.3f}-{time}.json', 'w') as file:
