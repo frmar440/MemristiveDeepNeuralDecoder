@@ -174,3 +174,6 @@ class Trainer(Tester):
             
             if batch % step == 0:
                 self.test_loop(model)
+                
+                if isinstance(model, AnalogSequential):
+                    model.load_rpu_config(self.training_rpu_config)
