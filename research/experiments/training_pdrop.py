@@ -88,15 +88,18 @@ def training_pdrop_run():
         # STD iteration
         for pdrop in PDROP:
 
-            re_pfr_std = re.compile(f'{pfr}.*{pdrop:.3f}')
+            re_pfr_pdrop_date = re.compile(f'{pfr}.*{pdrop:.3f}.*07-16')
 
-            MDND_LOAD_PATH = list(filter(re_pfr_std.search, MDND_LOAD_PATHS))[0]
+            MDND_LOAD_PATH = list(filter(re_pfr_pdrop_date.search, MDND_LOAD_PATHS))[0]
+
+            print(MDND_LOAD_PATH)
 
             # tester
             tester = Tester(
                 test_data=test_decode_data,
                 batch_size=BATCH_SIZE,
-                loss_fn=loss_fn
+                loss_fn=loss_fn,
+                test_rpu_config=rpu_config
             )
 
             model = MDND(
@@ -110,7 +113,7 @@ def training_pdrop_run():
 
             # statistics iteration
             for _ in range(10):
-                tester(model, inference=True)
+                tester(model)
             
             data.append(tester.accuracies)
         
