@@ -106,7 +106,7 @@ def hwa_inference_pdrop_run():
         
         # statistics iteration
         for _ in range(10):
-            tester(model, inference=True)
+            tester(model)
         
         data.append(tester.accuracies)
     
