@@ -11,7 +11,7 @@ class Tester:
     """Implementation of test loop.
     """
     def __init__(self, test_data, batch_size=64, loss_fn=None, batch_first=False,
-            test_rpu_config=None, max_accuracy=False) -> None:
+            test_rpu_config=None) -> None:
         """Test neural network model.
         Args:
             model (torch.nn.Module): neural network model.
@@ -30,8 +30,7 @@ class Tester:
 
         self.test_rpu_config = test_rpu_config
 
-        self.max_accuracy = 0. if max_accuracy else None
-        self.max_state_dict = None
+        self.max_accuracy = None
 
         self.reset_stats()
     
@@ -102,7 +101,7 @@ class Trainer(Tester):
             batch_first (bool, optinal): whether batch_size is first dimension or not. Defaults to True.
                                          Must be False for AnalogRNN.
         """
-        super().__init__(test_data, batch_size, loss_fn, batch_first, test_rpu_config, max_accuracy)
+        super().__init__(test_data, batch_size, loss_fn, batch_first, test_rpu_config)
         # wrap an iterable around the Dataset to enable easy access to the samples
         self.training_dataloader = DataLoader(training_data, batch_size=batch_size, shuffle=True)
 
@@ -111,6 +110,9 @@ class Trainer(Tester):
         self.optimizer = optimizer
 
         self.training_rpu_config = training_rpu_config
+
+        self.max_accuracy = 0. if max_accuracy else None
+        self.max_state_dict = None
     
 
     def __call__(self, model, n_step=1) -> None:

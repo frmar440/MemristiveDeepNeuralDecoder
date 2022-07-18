@@ -144,7 +144,7 @@ for std in np.linspace(0.0, 0.05, 11): # iterate for different std
 
     time = datetime.now()
     # save ha-mdnd
-    torch.save(analog_model.state_dict(),
+    torch.save(trainer.max_state_dict,
                 f'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}_std{std:.3f}-{time}.pth')
     # save hwa training parameters
     with open(f'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}_std{std:.3f}-{time}.json', 'w') as file:

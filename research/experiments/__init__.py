@@ -5,3 +5,4 @@ from experiments.decoder_performance import decoder_performance_run
 from experiments.fp_batchsize_lr import fp_batchsize_lr_run
 from experiments.training_noise import training_noise_run
 from experiments.training_pdrop import training_pdrop_run
+from experiments.inference_pdrop import hwa_inference_pdrop_run
