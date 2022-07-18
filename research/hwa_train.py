@@ -81,83 +81,8 @@ test_rpu_config.modifier = WeightModifierParameter(pdrop=0.1, # defective device
 
 DATA_PATH = DATA_PATHS[-1]
 
-# for std in np.linspace(0.0, 0.05, 11): # iterate for different std
+for std in np.linspace(0.0, 0.05, 11): # iterate for different std
 
-# for i, learning_rate in enumerate(LEARNING_RATES):
-#     # regex
-#     pfr = re.search('p[0-9]*', DATA_PATH).group(0)
-#     re_pfr = re.compile(pfr)
-
-#     MDND_LOAD_PATH = list(filter(re_pfr.search, MDND_LOAD_PATHS))[0]
-
-#     # load training and test datasets
-#     with open(DATA_PATH, 'rb') as f:
-#         dico = pickle.loads(f.read())
-
-#     training_decode_data = DecodeDataset(
-#         dico=dico,
-#         train=True,
-#         transform=Lambda(lambda y: torch.tensor(y, dtype=torch.float)),
-#         target_transform=Lambda(lambda y: torch.zeros(2, dtype=torch.float).scatter_(0, torch.tensor(y), value=1)) # one-hot encoding
-#     )
-
-#     test_decode_data = DecodeDataset(
-#         dico=dico,
-#         train=False,
-#         transform=Lambda(lambda y: torch.tensor(y, dtype=torch.float)),
-#         target_transform=Lambda(lambda y: torch.zeros(2, dtype=torch.float).scatter_(0, torch.tensor(y), value=1)) # one-hot encoding
-#     )
-
-
-#     device = "cuda" if torch.cuda.is_available() else "cpu"
-#     # memristive deep neural decoder
-#     analog_model = MDND(
-#         input_size=INPUT_SIZE,
-#         hidden_size=HIDDEN_SIZE,
-#         output_size=OUTPUT_SIZE,
-#         rpu_config=rpu_config
-#     ).to(device)
-#     # load weights (but use the current RPU config)
-#     analog_model.load_state_dict(torch.load(f'research/saves/fp-mdnd/{MDND_LOAD_PATH}'), load_rpu_config=False)
-
-
-#     # analog optimizer
-#     optimizer = AnalogOptimizer(Adam, analog_model.parameters(), lr=learning_rate)
-#     optimizer.regroup_param_groups(analog_model)
-#     # hwa training
-#     trainer = Trainer(
-#         training_data=training_decode_data,
-#         test_data=test_decode_data,
-#         learning_rate=learning_rate,
-#         batch_size=BATCH_SIZE,
-#         epochs=EPOCHS,
-#         loss_fn=loss_fn,
-#         optimizer=optimizer
-#     )
-#     trainer(analog_model)
-
-#     if i == 0:
-#         # dataframe init
-#         df = pd.DataFrame(index=trainer.train_batches, columns=LEARNING_RATES, dtype='float64')
-    
-#     df[learning_rate] = trainer.train_losses
-
-# df.to_pickle('research/experiments/results/training/hwa_lr_losses.pkl')
-
-# time = datetime.now()
-# # save ha-mdnd
-# torch.save(analog_model.state_dict(),
-#             f'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}_std{std:.3f}-{time}.pth')
-# # save hwa training parameters
-# with open(f'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}_std{std:.3f}-{time}.json', 'w') as file:
-#     file.write(json.dumps(trainer.training_state_dict()))
-
-
-
-# rpu_config.modifier.std_dev = 0.005 # expected value
-
-for pdrop in np.linspace(0.0, 0.3, 7): # iterate for different pdrop
-    
     # regex
     pfr = re.search('p[0-9]*', DATA_PATH).group(0)
     re_pfr = re.compile(pfr)
@@ -183,7 +108,7 @@ for pdrop in np.linspace(0.0, 0.3, 7): # iterate for different pdrop
     )
 
 
-    training_rpu_config.modifier.pdrop = pdrop
+    training_rpu_config.modifier.std_dev = std
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     # memristive deep neural decoder
@@ -213,14 +138,87 @@ for pdrop in np.linspace(0.0, 0.3, 7): # iterate for different pdrop
         test_rpu_config=test_rpu_config,
         max_accuracy=True
     )
-    # hwa training
+    # hwa-training
     trainer(analog_model, n_step=4)
 
 
     time = datetime.now()
     # save ha-mdnd
-    torch.save(trainer.max_state_dict,
-               f'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}_pdrop{pdrop:.3f}-{time}.pth')
+    torch.save(analog_model.state_dict(),
+                f'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}_std{std:.3f}-{time}.pth')
     # save hwa training parameters
-    with open(f'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}_pdrop{pdrop:.3f}-{time}.json', 'w') as file:
+    with open(f'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}_std{std:.3f}-{time}.json', 'w') as file:
         file.write(json.dumps(trainer.training_state_dict()))
+
+
+
+# rpu_config.modifier.std_dev = 0.005 # expected value
+
+# for pdrop in np.linspace(0.0, 0.3, 7): # iterate for different pdrop
+    
+#     # regex
+#     pfr = re.search('p[0-9]*', DATA_PATH).group(0)
+#     re_pfr = re.compile(pfr)
+
+#     MDND_LOAD_PATH = list(filter(re_pfr.search, MDND_LOAD_PATHS))[0]
+
+#     # load training and test datasets
+#     with open(DATA_PATH, 'rb') as f:
+#         dico = pickle.loads(f.read())
+
+#     training_decode_data = DecodeDataset(
+#         dico=dico,
+#         train=True,
+#         transform=Lambda(lambda y: torch.tensor(y, dtype=torch.float)),
+#         target_transform=Lambda(lambda y: torch.zeros(2, dtype=torch.float).scatter_(0, torch.tensor(y), value=1)) # one-hot encoding
+#     )
+
+#     test_decode_data = DecodeDataset(
+#         dico=dico,
+#         train=False,
+#         transform=Lambda(lambda y: torch.tensor(y, dtype=torch.float)),
+#         target_transform=Lambda(lambda y: torch.zeros(2, dtype=torch.float).scatter_(0, torch.tensor(y), value=1)) # one-hot encoding
+#     )
+
+
+#     training_rpu_config.modifier.pdrop = pdrop
+
+#     device = "cuda" if torch.cuda.is_available() else "cpu"
+#     # memristive deep neural decoder
+#     analog_model = MDND(
+#         input_size=INPUT_SIZE,
+#         hidden_size=HIDDEN_SIZE,
+#         output_size=OUTPUT_SIZE,
+#         rpu_config=training_rpu_config
+#     ).to(device)
+#     # load weights (but use the current RPU config)
+#     analog_model.load_state_dict(torch.load(f'research/saves/fp-mdnd/{MDND_LOAD_PATH}'), load_rpu_config=False)
+
+
+#     # analog optimizer
+#     optimizer = AnalogOptimizer(Adam, analog_model.parameters(), lr=LEARNING_RATE)
+#     optimizer.regroup_param_groups(analog_model)
+#     # hwa training
+#     trainer = Trainer(
+#         training_data=training_decode_data,
+#         test_data=test_decode_data,
+#         learning_rate=LEARNING_RATE,
+#         batch_size=BATCH_SIZE,
+#         epochs=EPOCHS,
+#         loss_fn=loss_fn,
+#         optimizer=optimizer,
+#         training_rpu_config=training_rpu_config,
+#         test_rpu_config=test_rpu_config,
+#         max_accuracy=True
+#     )
+#     # hwa training
+#     trainer(analog_model, n_step=4)
+
+
+#     time = datetime.now()
+#     # save ha-mdnd
+#     torch.save(trainer.max_state_dict,
+#                f'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}_pdrop{pdrop:.3f}-{time}.pth')
+#     # save hwa training parameters
+#     with open(f'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}_pdrop{pdrop:.3f}-{time}.json', 'w') as file:
+#         file.write(json.dumps(trainer.training_state_dict()))
