@@ -201,15 +201,18 @@ template <typename T> void RPUSimple<T>::initialize(int x_sz, int d_sz) {
   use_delayed_update_ = false;
 
   weights_ = Array_2D_Get<T>(d_sz, x_sz);
+  probe_weights_ = Array_2D_Get<T>(d_sz, x_sz);
   fb_weights_ = nullptr;
   delta_weights_extern_.resize(d_sz, nullptr); // this is a pointer array of row pointers
 
   for (int i = 0; i < d_sz; ++i) {
     for (int j = 0; j < x_sz; ++j) {
       weights_[i][j] = (i + 1) * (T)100.0 + (j + 1);
+      probe_weights_[i][j] = (i + 1) * (T)100.0 + (j + 1);
     }
   }
   weights_buffer_ = Array_2D_Get<T>(d_sz, x_sz);
+  probe_weights_buffer_ = Array_2D_Get<T>(d_sz, x_sz);
 
   temp_x_matrix_bias_size_ = 0;
   temp_x_matrix_bias_ = nullptr;
@@ -257,6 +260,7 @@ template <typename T> RPUSimple<T>::~RPUSimple() {
   }
 
   Array_2D_Free<T>(weights_buffer_);
+  Array_2D_Free<T>(probe_weights_buffer_);
 
   if (fb_weights_ != nullptr) {
     Array_2D_Free<T>(fb_weights_);
@@ -284,6 +288,7 @@ template <typename T> RPUSimple<T>::RPUSimple(const RPUSimple<T> &other) : RPUAb
   this->initialize(other.x_size_, other.d_size_);
 
   this->setWeights(*other.weights_);
+  this->setProbeWeights(*other.probe_weights_);
 
   this->copyWeightsToBuffer();
 
@@ -298,6 +303,7 @@ template <typename T> RPUSimple<T>::RPUSimple(const RPUSimple<T> &other) : RPUAb
 
   // no copy needed
   wclipper_ = nullptr;
+  wprobe_ = nullptr;
 
   // cannot copy external weight pointer... user needs to call it again
   delta_weights_extern_[0] = nullptr;
@@ -359,10 +365,13 @@ template <typename T> RPUSimple<T> &RPUSimple<T>::operator=(RPUSimple<T> &&other
   weights_ = other.weights_;
   other.weights_ = nullptr;
 
+  probe_weights_ = other.probe_weights_;
+  other.probe_weights_ = nullptr;
+
   shared_weights_if_ = other.shared_weights_if_;
 
-  weights_buffer_ = other.weights_buffer_;
-  other.weights_buffer_ = nullptr;
+  probe_weights_buffer_ = other.probe_weights_buffer_;
+  other.probe_weights_buffer_ = nullptr;
 
   fb_weights_ = other.fb_weights_;
   other.fb_weights_ = nullptr;
@@ -1203,6 +1212,14 @@ template <typename T> void RPUSimple<T>::setWeights(const T *weightsptr) {
   }
 }
 
+template <typename T> void RPUSimple<T>::setProbeWeights(const T *probeweightsptr) {
+  T *pw = this->getProbeWeightsPtr()[0];
+  if (probeweightsptr != pw) {
+    int size = this->d_size_ * this->x_size_;
+    memcpy(pw, probeweightsptr, size * sizeof(T));
+  }
+}
+
 template <typename T> void RPUSimple<T>::setWeightsWithAlpha(const T *weightsptr, T assumed_wmax) {
 
   if (assumed_wmax <= 0.0) {
@@ -1344,6 +1361,11 @@ template <typename T> void RPUSimple<T>::applyWeightUpdate(T *dw_and_current_wei
 template <typename T> void RPUSimple<T>::getWeights(T *weightsptr) const {
   T *w = this->getWeightsPtr()[0];
   memcpy(weightsptr, w, sizeof(T) * this->x_size_ * this->d_size_);
+}
+
+template <typename T> void RPUSimple<T>::getProbeWeights(T *probeweightsptr) const {
+  T *pw = this->getProbeWeightsPtr()[0];
+  memcpy(probeweightsptr, pw, sizeof(T) * this->x_size_ * this->d_size_);
 }
 
 template <typename T> void RPUSimple<T>::setDeltaWeights(T *dw_extern) {
@@ -1500,6 +1522,15 @@ template <typename T> void RPUSimple<T>::clipWeights(const WeightClipParameter &
   }
 
   wclipper_->apply(getWeightsPtr()[0], wclpar);
+}
+
+template <typename T> void RPUSimple<T>::probeWeights() {
+
+  if (wprobe_ == nullptr) {
+    wprobe_ = make_unique<WeightProbe<T>>(this->x_size_, this->d_size_);
+  }
+
+  wprobe_->apply(getWeightsPtr()[0], getProbeWeightsPtr()[0]);
 }
 
 template <typename T> void RPUSimple<T>::diffuseWeights() {

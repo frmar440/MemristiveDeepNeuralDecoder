@@ -91,6 +91,9 @@ class AnalogLinear(AnalogModuleBase, Linear):
         # Set weights from the reset_parameters call
         self.set_weights(self.weight, self.bias, remap_weights=True,
                          weight_scaling_omega=weight_scaling_omega)
+        
+        # Set identity probe weights
+        self.set_probe_weights()
 
         # Unregister weight/bias as a parameter but keep it as a
         # field (needed for syncing still)

@@ -132,6 +132,7 @@ class BaseTile(Generic[RPUConfigGeneric]):
         current_dict = self.__dict__.copy()
 
         current_dict['analog_tile_weights'] = self.tile.get_weights()
+        current_dict['analog_tile_probe_weights'] = self.tile.get_probe_weights()
         # Store the hidden parameters as a numpy array, as storing it as
         # Tensor causes issues in PyTorch 1.5.
         current_dict['analog_tile_hidden_parameters'] \
@@ -173,6 +174,7 @@ class BaseTile(Generic[RPUConfigGeneric]):
         current_dict = state.copy()
         current_dict.pop('image_sizes', None)  # should not be saved
         weights = current_dict.pop('analog_tile_weights')
+        probe_weights = current_dict.pop('analog_tile_probe_weights')
         hidden_parameters = current_dict.pop('analog_tile_hidden_parameters')
         hidden_parameters_names = current_dict.pop('analog_tile_hidden_parameter_names', [])
         alpha_scale = current_dict.pop('analog_alpha_scale', None)
@@ -209,6 +211,7 @@ class BaseTile(Generic[RPUConfigGeneric]):
                             'Hidden parameter structure is unexpected.')
         self.tile.set_hidden_parameters(Tensor(hidden_parameters))
         self.tile.set_weights(ascontiguousarray(weights))
+        self.tile.set_probe_weights(ascontiguousarray(probe_weights))
 
         self.tile.set_learning_rate(analog_lr)
 

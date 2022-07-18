@@ -1,12 +1,11 @@
 """Define memristive deep neural decoders.
 """
-from typing import Optional, Any, OrderedDict
+from typing import Optional, Any, OrderedDict, List
 
 from torch import Tensor
 from aihwkit.exceptions import ModuleError
 from aihwkit.nn import AnalogRNN, AnalogLinear, AnalogSequential
-from aihwkit.nn.modules.base import RPUConfigAlias, AnalogModuleBase
-from aihwkit.simulator.tiles import InferenceTile
+from aihwkit.nn.modules.base import RPUConfigAlias
 
 
 class MDND(AnalogSequential):
@@ -74,29 +73,7 @@ class MDND(AnalogSequential):
         
         analog_module._modules = module._modules
 
-        return analog_module
-
-    def load_rpu_config(self, rpu_config):
-        self._apply_to_analog(lambda m: m._load_from_rpu_config(rpu_config))
-
-    def get_weights(self):
-        weights = []
-        for module in self.modules():
-            if isinstance(module, AnalogModuleBase):
-                weights.extend(module.get_weights())
-        return weights
-
-    def get_conductances(self):
-        conductances = []
-        for module in self.modules():
-            if isinstance(module, AnalogModuleBase):
-                for analog_tile in module.analog_tiles():
-                    if isinstance(analog_tile, InferenceTile):
-                        target_conductances, params = analog_tile.noise_model.g_converter.convert_to_conductances(
-                            Tensor(analog_tile.tile.get_weights())
-                        )
-                        conductances.append(target_conductances)
-        return conductances                  
+        return analog_module                 
 
     def forward(self, inputs: Tensor):
         """Compute the forward pass."""

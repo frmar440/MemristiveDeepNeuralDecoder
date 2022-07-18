@@ -154,6 +154,24 @@ void declare_rpu_tiles(py::module &m) {
            )pbdoc")
 
       .def(
+          "get_probe_weights",
+          [](Class &self) {
+            // Build the buffer.
+            py::array_t<T> probe_weights = py::array_t<T>({self.getDSize(), self.getXSize()});
+            py::buffer_info probe_weights_buffer = probe_weights.request();
+
+            // Call RPU function.
+            self.getProbeWeights((T *)probe_weights_buffer.ptr);
+            return probe_weights;
+          },
+          R"pbdoc(
+           Return the probe weights.
+
+           Returns:
+               ndarray: the ``[d_size, x_size]`` probe weight matrix.
+           )pbdoc")
+
+      .def(
           "set_weights",
           [](Class &self, py::array_t<T> weights) {
             // Validate the weights dimensions.
@@ -181,6 +199,34 @@ void declare_rpu_tiles(py::module &m) {
 
            Args:
                weights: ``[d_size, x_size]`` weight matrix.
+           )pbdoc")
+        
+      .def(
+          "set_probe_weights",
+          [](Class &self, py::array_t<T> probe_weights) {
+            // Validate the weights dimensions.
+            if (probe_weights.ndim() != 2 || probe_weights.shape(0) != self.getDSize() ||
+                probe_weights.shape(1) != self.getXSize()) {
+              throw std::runtime_error(
+                  "Invalid weights dimensions: expected [" + std::to_string(self.getDSize()) + "," +
+                  std::to_string(self.getXSize()) + "] array");
+            }
+
+            // Build the buffer.
+            py::buffer_info probe_weights_buffer = probe_weights.request();
+
+            // Call RPU function.
+            return self.setProbeWeights((T *)probe_weights_buffer.ptr);
+          },
+          py::arg("probe_weights"),
+          R"pbdoc(
+           Set the tile probe_weights for hwa-training.
+
+           Note:
+               This is **not** hardware realistic, and is used for debug purposes only.
+
+           Args:
+               probe_weights: ``[d_size, x_size]`` matrix.
            )pbdoc")
 
       .def(
@@ -346,6 +392,15 @@ void declare_rpu_tiles(py::module &m) {
 
            Args:
                weight_clipper_params: parameters of the clipping.
+           )pbdoc")
+      .def(
+          "probe_weights",
+          [](Class &self) {
+            std::lock_guard<std::mutex> lock(self.mutex_);
+            self.probeWeights();
+          },
+          R"pbdoc(
+           Probes the weights for use of hardware-aware training.
            )pbdoc")
       .def(
           "modify_weights",

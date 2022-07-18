@@ -16,6 +16,7 @@
 #include "weight_clipper.h"
 #include "weight_drifter.h"
 #include "weight_modifier.h"
+#include "weight_probe.h"
 #include <cfenv>
 #include <iostream>
 #include <memory>
@@ -196,9 +197,11 @@ public:
     swap(a.par_, b.par_);
 
     swap(a.weights_, b.weights_);
+    swap(a.probe_weights_, b.probe_weights_);
     swap(a.shared_weights_if_, b.shared_weights_if_);
 
     swap(a.weights_buffer_, b.weights_buffer_);
+    swap(a.probe_weights_buffer_, b.probe_weights_buffer_);
     swap(a.use_delayed_update_, b.use_delayed_update_);
 
     swap(a.temp_x_matrix_bias_, b.temp_x_matrix_bias_);
@@ -212,6 +215,7 @@ public:
 
     swap(a.wdrifter_, b.wdrifter_);
     swap(a.wclipper_, b.wclipper_);
+    swap(a.wprobe_, b.wprobe_);
 
     swap(a.fb_weights_, b.fb_weights_);
     swap(a.delta_weights_extern_, b.delta_weights_extern_);
@@ -258,6 +262,9 @@ public:
   void setWeightsAndBiasWithAlpha(
       const T *weightsptr, const T *biasptr, T assumed_wmax, bool real_if = false, int n_loops = 1);
 
+  /* setProbeWeights* set the probe weights perfectly*/
+  virtual void setProbeWeights(const T *probeweightsptr);
+
   /* setSharedWeights can be used to provide an external weight
      pointer to handle the memory of the weights. Note that weights
      for CPU are always stored in row-major format.*/
@@ -268,9 +275,17 @@ public:
   inline T **getWeightsPtr() const { return this->weights_; };
   virtual T **getWeights() { return getWeightsPtr(); };
 
+  /* access to the CPU probe weight ptr*/
+  inline T **getProbeWeightsPtr() const { return this->probe_weights_; };
+  virtual T **getProbeWeights() { return getProbeWeightsPtr(); };
+
   /* get weights by copying weights to given pointer. Might
      implicitly copy to host (CPU) weights*/
   virtual void getWeights(T *weightsptr) const;
+
+  /* get weights by copying weights to given pointer. Might
+    implicitly copy to host (CPU) weights*/
+  virtual void getProbeWeights(T *probeweightsptr) const;
 
   /* methods to get/set the weights using read-write-verify cycles
      with the current definition of analog forward/update*/
@@ -313,6 +328,9 @@ public:
      some manner, only for HWA training.*/
   virtual void clipWeights(const T clip);
   virtual void clipWeights(const WeightClipParameter &wclpar);
+
+  /* Probe the weights.*/
+  virtual void probeWeights();
 
   /* Applying a potential reset with given probabilties to a selection of columns */
   virtual void resetCols(int start_col, int n_cols, T reset_prob) {
@@ -623,7 +641,9 @@ protected:
   std::shared_ptr<RNG<T>> rng_ = nullptr;
   std::shared_ptr<RealWorldRNG<T>> rw_rng_ = nullptr;
   T **weights_ = nullptr;
+  T **probe_weights_ = nullptr;
   T **weights_buffer_ = nullptr;
+  T **probe_weights_buffer_ = nullptr;
   T **fb_weights_ = nullptr;
 
   int last_update_m_batch_ = 1;
@@ -644,6 +664,7 @@ private:
 
   std::unique_ptr<WeightDrifter<T>> wdrifter_ = nullptr;
   std::unique_ptr<WeightClipper<T>> wclipper_ = nullptr;
+  std::unique_ptr<WeightProbe<T>> wprobe_ = nullptr;
   std::unique_ptr<WeightModifier<T>> fb_weight_modifier_ = nullptr;
 
   int *matrix_indices_ = nullptr;
