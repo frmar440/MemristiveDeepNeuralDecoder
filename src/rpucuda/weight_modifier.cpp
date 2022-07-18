@@ -13,6 +13,7 @@
 #include "weight_modifier.h"
 #include "math_util.h"
 #include "utility_functions.h"
+#include <stdio.h>
 
 namespace RPU {
 
@@ -23,10 +24,12 @@ template <typename T>
 WeightModifier<T>::WeightModifier(int x_size, int d_size)
     : x_size_(x_size), d_size_(d_size), size_(d_size * x_size) {}
 
-template <typename T> void WeightModifier<T>::dropConnections(T *weights, T prob) {
+template <typename T>
+void WeightModifier<T>::dropConnections(T *weights, T prob) {
 
   PRAGMA_SIMD
   for (int i = 0; i < size_; i++) {
+    printf("%f %i", weights[i], size_);
     if (rw_rng_.sampleUniform() < prob) {
       weights[i] = 0.0;
     }

@@ -102,7 +102,7 @@ def hwa_inference_pdrop_run():
             rpu_config=test_rpu_config
         ).to(device)
         # load weights (but use the current RPU config)
-        model.load_state_dict(torch.load(f'research/saves/fp-mdnd/{MDND_LOAD_PATH}'))
+        model.load_state_dict(torch.load(f'{MDND_LOAD_PATH}'))
         
         # statistics iteration
         for _ in range(10):
