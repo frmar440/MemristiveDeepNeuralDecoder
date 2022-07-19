@@ -323,6 +323,28 @@ class BaseTile(Generic[RPUConfigGeneric]):
 
         return self.tile.set_weights(numpy_weights)
 
+    def set_probe_weights(
+            self,
+            probe_weights: Tensor
+    ) -> None:
+        """Set the tile probe weights.
+
+        Sets the internal tile probe weights to the specified values..
+
+        Args:
+            weights: ``[out_size, in_size]`` probe weight matrix.
+
+        Returns:
+            None.
+        """
+        # Prepare the array expected by the pybind function, appending the
+        # biases row if needed.
+        probe_weights_torch = probe_weights.clone().detach().cpu()
+
+        numpy_probe_weights = ascontiguousarray(probe_weights_torch.numpy())
+
+        self.tile.set_probe_weights(numpy_probe_weights)
+
     def get_weights(self, realistic: bool = False) -> Tuple[Tensor, Optional[Tensor]]:
         """Get the tile weights (and biases).
 
