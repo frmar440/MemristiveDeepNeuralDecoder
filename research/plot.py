@@ -582,7 +582,7 @@ def hwa_lr_losses_plot():
 def hwa_inference_pdrop_plot():
 
     df = pd.read_pickle('research/experiments/results/hwa_inference_pdrop.pkl')
-    std_dev = df.index.to_numpy()*100
+    test_pdrops = df.index.to_numpy()*100
 
     decoder_performance = pd.read_pickle('research/experiments/results/decoder_performance.pkl')
     baseline = decoder_performance["baseline", "mean"]
@@ -590,12 +590,43 @@ def hwa_inference_pdrop_plot():
     fig, ax = plt.subplots()
 
     ax.axhline(baseline[1.0]*100, color='k', linestyle='--')
-    ax.annotate(f'Baseline: {baseline[1.0]*100:>.2f}%\n'
+    ax.annotate(f'Baseline: {baseline[1.0]*100:>.2f}%\n',
                 r'$p = 1.00\%$',
                 xy=(.45, .5), xycoords='axes fraction')
-    mean, std = df["p01", "mean"].to_numpy()*100, df["p01", "std"].to_numpy()*100     
-    ax.plot(std_dev, mean, color='purple')
-    ax.fill_between(std_dev, mean-std, mean+std, facecolor='violet', alpha=0.3)
+    
+    for training_pdrop in df:
+        mean = df[training_pdrop, "mean"].to_numpy()*100
+        std = df[training_pdrop, "std"].to_numpy()*100 
+        training_pdrop = float(training_pdrop[-5:-2])*100
+        ax.errorbar(test_pdrops, mean, yerr=std, marker='s',
+                    label=f'pdrop = {training_pdrop:.0f}%')    
+
+    ax.set_xlabel('Defective device probability [%]')
+    ax.set_ylabel('Decoder test accuracy [%]')
+    ax.tick_params(direction='in')
+
+    plt.show()
+
+def hwa_inference_optimal_pdrop_plot():
+
+    df = pd.read_pickle('research/experiments/results/hwa_inference_optimal_pdrop.pkl')
+    test_pdrops = df.index.to_numpy()*100
+
+    decoder_performance = pd.read_pickle('research/experiments/results/decoder_performance.pkl')
+    baseline = decoder_performance["baseline", "mean"]
+
+    fig, ax = plt.subplots()
+
+    ax.axhline(baseline[1.0]*100, color='k', linestyle='--')
+    ax.annotate(f'Baseline: {baseline[1.0]*100:>.2f}%\n',
+                r'$p = 1.00\%$',
+                xy=(.45, .5), xycoords='axes fraction')
+    
+    for training_scheme in df:
+        mean = df[training_scheme, "mean"].to_numpy()*100
+        std = df[training_scheme, "std"].to_numpy()*100
+        ax.errorbar(test_pdrops, mean, yerr=std, marker='s',
+                    label=training_scheme.upper())
 
     ax.set_xlabel('Defective device probability [%]')
     ax.set_ylabel('Decoder test accuracy [%]')
