@@ -478,8 +478,6 @@ class AnalogModuleBase(Module):
                     analog_state['rpu_config'] = analog_tile.rpu_config
                     analog_state['noise_model'] = analog_tile.rpu_config.noise_model
                     analog_state['drift_compensation'] = analog_tile.rpu_config.drift_compensation
-                    # TODO: remove when mdnd have been retrained
-                    analog_state['analog_tile_probe_weights'] = analog_tile.tile.get_probe_weights()
                 analog_tile.__setstate__(analog_state)
 
             elif strict:
@@ -525,8 +523,6 @@ class AnalogModuleBase(Module):
                     analog_state['rpu_config'] = rpu_config
                     analog_state['noise_model'] = rpu_config.noise_model
                     analog_state['drift_compensation'] = rpu_config.drift_compensation
-                    # TODO: remove when mdnd have been retrained
-                    analog_state['analog_tile_probe_weights'] = analog_tile.tile.get_probe_weights()
                 analog_tile.__setstate__(analog_state)
 
     def state_dict(
