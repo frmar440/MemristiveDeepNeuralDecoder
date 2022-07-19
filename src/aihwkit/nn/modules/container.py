@@ -12,14 +12,16 @@
 
 """Analog Modules that contain children Modules."""
 
-from typing import Callable, Optional, Union, Any, NamedTuple, TYPE_CHECKING
+from typing import Callable, Optional, Union, Any, NamedTuple, TYPE_CHECKING, List
 from collections import OrderedDict
 
 from torch import device as torch_device
+from torch import Tensor
 from torch.nn import Sequential
 
 from aihwkit.exceptions import ModuleError, TileError
 from aihwkit.nn.modules.base import AnalogModuleBase
+from aihwkit.simulator.tiles import InferenceTile
 
 if TYPE_CHECKING:
     from torch import Tensor  # pylint: disable=ungrouped-imports
@@ -242,6 +244,34 @@ class AnalogSequential(Sequential):
         """Unprogram all analog inference layers of a given model."""
 
         self._apply_to_analog(lambda m: m.unprogram_analog_weights())
+
+    def load_rpu_config(self, rpu_config):
+        self._apply_to_analog(lambda m: m._load_from_rpu_config(rpu_config))
+    
+    def load_probes(self, probes: OrderedDict[Tensor]):
+        for module in self.modules():
+            if isinstance(module, AnalogModuleBase):
+                _, probe = probes.popitem(last=False)
+                module.set_probe_weights(probe)
+
+    def get_weights(self):
+        weights = []
+        for module in self.modules():
+            if isinstance(module, AnalogModuleBase):
+                weights.extend(module.get_weights())
+        return weights
+
+    def get_conductances(self):
+        conductances = []
+        for module in self.modules():
+            if isinstance(module, AnalogModuleBase):
+                for analog_tile in module.analog_tiles():
+                    if isinstance(analog_tile, InferenceTile):
+                        target_conductances, _ = analog_tile.noise_model.g_converter.convert_to_conductances(
+                            Tensor(analog_tile.tile.get_weights())
+                        )
+                        conductances.append(target_conductances)
+        return conductances 
 
     @classmethod
     def from_digital(cls, module: Sequential,  # pylint: disable=unused-argument

@@ -120,6 +120,7 @@ for std in np.linspace(0.0, 0.05, 11): # iterate for different std
     ).to(device)
     # load weights (but use the current RPU config)
     analog_model.load_state_dict(torch.load(f'research/saves/fp-mdnd/{MDND_LOAD_PATH}'), load_rpu_config=False)
+    
 
 
     # analog optimizer

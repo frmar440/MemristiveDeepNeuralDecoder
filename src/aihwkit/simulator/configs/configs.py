@@ -154,6 +154,9 @@ class InferenceRPUConfig(MapableRPU, _PrintableMixin):
     modifier: WeightModifierParameter = field(default_factory=WeightModifierParameter)
     """Parameter for weight modifier."""
 
+    # probe: bool = False
+    # """Whether weight probe hwa is activated or not."""
+
     # The following fields are not included in `__init__`, and should be
     # treated as read-only.
 

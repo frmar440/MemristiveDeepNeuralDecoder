@@ -14,6 +14,7 @@
 
 from copy import deepcopy
 from typing import List, Optional, Union, TYPE_CHECKING
+from numpy import ascontiguousarray
 
 from torch import device as torch_device
 from torch import ones, zeros, Tensor
@@ -130,6 +131,47 @@ class InferenceTile(AnalogTile):
         
         self.tile.set_weights(self.unprogrammed_weights.numpy())
 
+    def set_probe_weights(
+            self,
+            probe_weights: Tensor
+    ) -> None:
+        """Set the tile weights (and biases).
+
+        Sets the internal tile weights to the specified values, and also the
+        internal tile biases if the tile was set to use bias (via
+        ``self.bias``).
+
+        Note:
+            By default this is **not** hardware realistic. You can set the
+            ``realistic`` parameter to ``True`` for a realistic transfer.
+
+        Args:
+            weights: ``[out_size, in_size]`` weight matrix.
+            biases: ``[out_size]`` bias vector. This parameter is required if
+                ``self.bias`` is ``True``, and ignored otherwise.
+            realistic: whether to use the forward and update pass to
+                program the weights iteratively, using
+                :meth:`set_weights_realistic`.
+            n_loops: number of times the columns of the weights are set in a
+                closed-loop manner.
+                A value of ``1`` means that all columns in principle receive
+                enough pulses to change from ``w_min`` to ``w_max``.
+
+        Returns:
+            None.
+
+        Raises:
+            ValueError: if the tile has bias but ``bias`` has not been
+                specified.
+        """
+        # Prepare the array expected by the pybind function, appending the
+        # biases row if needed.
+        probe_weights_torch = probe_weights.clone().detach().cpu()
+
+        numpy_probe_weights = ascontiguousarray(probe_weights_torch.numpy())
+
+        self.tile.set_probe_weights(numpy_probe_weights)
+
     @no_grad()
     def drift_weights(
             self,
@@ -200,6 +242,9 @@ class InferenceTile(AnalogTile):
         if self.rpu_config.clip.type != WeightClipType.NONE:
             weight_clip_params = parameters_to_bindings(self.rpu_config.clip)
             self.tile.clip_weights(weight_clip_params)
+        
+        # post_update probe
+        self.tile.probe_weights()
 
     def cuda(
             self,

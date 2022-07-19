@@ -17,7 +17,7 @@ from typing import (
 )
 from copy import deepcopy
 
-from torch import Tensor, no_grad, ones, float32
+from torch import Tensor, no_grad, ones, float32, ones_like
 from torch.nn import Module, Parameter
 from torch import device as torch_device
 
@@ -283,6 +283,22 @@ class AnalogModuleBase(Module):
 
         self._sync_weights_from_tile()
 
+    def set_probe_weights(
+            self,
+            probe_weight: Optional[Tensor] = None
+    ) -> None:
+        """Set the probe weight values with given tensors."""
+
+        analog_tiles = list(self.analog_tiles())
+        if len(analog_tiles) != 1:
+            raise ModuleError("AnalogModuleBase.set_probe_weights only supports a single tile.")
+        analog_tile = analog_tiles[0]
+
+        if probe_weight is None:
+            probe_weight = ones_like(Tensor(analog_tile.tile.get_weights())) # identity probe_weight
+        
+        analog_tile.set_probe_weights(probe_weight)
+
     def get_weights(
             self,
             force_exact: bool = False,
@@ -462,6 +478,8 @@ class AnalogModuleBase(Module):
                     analog_state['rpu_config'] = analog_tile.rpu_config
                     analog_state['noise_model'] = analog_tile.rpu_config.noise_model
                     analog_state['drift_compensation'] = analog_tile.rpu_config.drift_compensation
+                    # TODO: remove when mdnd have been retrained
+                    analog_state['analog_tile_probe_weights'] = analog_tile.tile.get_probe_weights()
                 analog_tile.__setstate__(analog_state)
 
             elif strict:
@@ -507,6 +525,8 @@ class AnalogModuleBase(Module):
                     analog_state['rpu_config'] = rpu_config
                     analog_state['noise_model'] = rpu_config.noise_model
                     analog_state['drift_compensation'] = rpu_config.drift_compensation
+                    # TODO: remove when mdnd have been retrained
+                    analog_state['analog_tile_probe_weights'] = analog_tile.tile.get_probe_weights()
                 analog_tile.__setstate__(analog_state)
 
     def state_dict(
