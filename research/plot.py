@@ -4,6 +4,7 @@ import numpy as np
 import pickle
 import pandas as pd
 from scipy.optimize import curve_fit
+from cycler import cycler
 
 import torch
 from models import MDND
@@ -213,48 +214,6 @@ def pdrop_plot():
     fig.supylabel('Decoder test accuracy [%]')
 
     plt.savefig('research/plots/pdrop.pdf')
-
-def decoder_performance_plot():
-
-    df = pd.read_pickle('research/experiments/results/decoder_performance.pkl')
-    df2 = pd.read_pickle('research/experiments/results/naive_performance.pkl')
-
-    pfr = df.index.to_numpy()
-    pfr_linspace = np.linspace(0.15, 1, 100)
-
-    naive = df2["naive"].to_numpy()*100
-    baseline_mean = df["baseline", "mean"].to_numpy()*100
-    baseline_std = df["baseline", "std"].to_numpy()*100
-    fp_mdnd_mean = df["fp-mdnd", "mean"].to_numpy()*100
-    fp_mdnd_std = df["fp-mdnd", "std"].to_numpy()*100
-
-    def monomial(x, a, b):
-        return a * x**b
-
-    naive_popt, _ = curve_fit(monomial, pfr, 100-naive)
-    baseline_popt, _ = curve_fit(monomial, pfr, 100-baseline_mean)
-    fp_mdnd_popt, _ = curve_fit(monomial, pfr, 100-fp_mdnd_mean)
-
-    fig, ax = plt.subplots()
-
-    ax.plot(pfr, 100-naive, marker='s', linestyle='', color='red')
-    ax.plot(pfr_linspace, monomial(pfr_linspace, *naive_popt), linestyle='-', color='red',
-            label=f'Naive decoder: {naive_popt[0]:.2f}*p^{naive_popt[1]:.2f}')
-
-    ax.errorbar(pfr, 100-baseline_mean, yerr=baseline_std, marker='s', linestyle='', color='limegreen')
-    ax.plot(pfr_linspace, monomial(pfr_linspace, *baseline_popt), linestyle='-', color='limegreen',
-            label=f'Baseline: {baseline_popt[0]:.2f}*p^{baseline_popt[1]:.2f}')
-    
-    ax.errorbar(pfr, 100-fp_mdnd_mean, yerr=fp_mdnd_std, marker='s', linestyle='', color='dodgerblue')
-    ax.plot(pfr_linspace, monomial(pfr_linspace, *fp_mdnd_popt), linestyle='-', color='dodgerblue',
-            label=f'FP-MDND: {fp_mdnd_popt[0]:.2f}*p^{fp_mdnd_popt[1]:.2f}')
-
-    ax.set_xlabel('Physical fault rate [%]')
-    ax.set_ylabel('Logical fault rate [%]')
-    ax.tick_params(direction='in', which='both')
-    ax.legend()
-
-    plt.savefig('research/plots/decoder_performance.pdf')
 
 def weight_distribution_plot():
 
@@ -631,6 +590,44 @@ def hwa_inference_optimal_pdrop_plot():
     ax.set_xlabel('Defective device probability [%]')
     ax.set_ylabel('Decoder test accuracy [%]')
     ax.tick_params(direction='in')
+
+    plt.show()
+
+def decoder_performance_plot():
+
+    def monomial(x, a, b):
+        return a * x**b
+
+    df = pd.read_pickle('research/experiments/results/decoder_performance.pkl')
+    df_naive = pd.read_pickle('research/experiments/results/naive_performance.pkl')
+
+    pfr = df.index.to_numpy()
+    pfr_linspace = np.linspace(0.15, 1, 100)
+
+    naive = df_naive["naive"].to_numpy()*100
+
+    fig, ax = plt.subplots()
+
+    naive_popt, _ = curve_fit(monomial, pfr, 100-naive)
+
+    ax.plot(pfr, 100-naive, marker='s', linestyle='', c='b')
+    ax.plot(pfr_linspace, monomial(pfr_linspace, *naive_popt), linestyle='-', c='b',
+            label=f'Naive decoder: ${{{naive_popt[0]:.2f}}}*p^{{{naive_popt[1]:.2f}}}$')
+
+    for training_scheme, c in zip(df, ['g', 'r', 'c', 'm', 'y']):
+        label = "Baseline" if training_scheme == "baseline" else training_scheme.upper()
+        mean = df[training_scheme, "mean"].to_numpy()*100
+        std = df[training_scheme, "std"].to_numpy()*100
+        popt, _ = curve_fit(monomial, pfr, 100-mean)
+
+        ax.errorbar(pfr, 100-mean, yerr=std, marker='s', linestyle='', c=c)
+        ax.plot(pfr_linspace, monomial(pfr_linspace, *popt), linestyle='-', c=c,
+            label=f'{label}: ${{{popt[0]:.2f}}}*p^{{{popt[1]:.2f}}}$')
+
+    ax.set_xlabel('Physical fault rate [%]')
+    ax.set_ylabel('Logical fault rate [%]')
+    ax.tick_params(direction='in', which='both')
+    ax.legend()
 
     plt.show()
 

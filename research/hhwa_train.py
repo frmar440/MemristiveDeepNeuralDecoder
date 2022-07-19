@@ -100,9 +100,90 @@ test_rpu_config.forward.out_noise = 0.
 test_rpu_config.noise_model = RRAMLikeNoiseModel(g_max=200.0, g_min=60.0, prog_noise_scale=1.) # rram noise (weights programmation in test mode)
 test_rpu_config.modifier = WeightModifierParameter(enable_during_test=True)
 
-DATA_PATH = DATA_PATHS[-1]
+##########
+# TRAIN FOR DIFFERENT PDROP @ PFR = 0.01
 
-for pdrop in np.linspace(0.0, 0.1, 6): # iterate for different pdrop
+# DATA_PATH = DATA_PATHS[-1]
+
+# for pdrop in np.linspace(0.0, 0.1, 6): # iterate for different pdrop
+
+#     # probes with given defective device probability
+#     probes = get_probes(pdrop)
+
+#     # regex
+#     pfr = re.search('p[0-9]*', DATA_PATH).group(0)
+#     re_pfr = re.compile(pfr)
+
+#     MDND_LOAD_PATH = list(filter(re_pfr.search, MDND_LOAD_PATHS))[0]
+
+#     # load training and test datasets
+#     with open(DATA_PATH, 'rb') as f:
+#         dico = pickle.loads(f.read())
+
+#     training_decode_data = DecodeDataset(
+#         dico=dico,
+#         train=True,
+#         transform=Lambda(lambda y: torch.tensor(y, dtype=torch.float)),
+#         target_transform=Lambda(lambda y: torch.zeros(2, dtype=torch.float).scatter_(0, torch.tensor(y), value=1)) # one-hot encoding
+#     )
+
+#     test_decode_data = DecodeDataset(
+#         dico=dico,
+#         train=False,
+#         transform=Lambda(lambda y: torch.tensor(y, dtype=torch.float)),
+#         target_transform=Lambda(lambda y: torch.zeros(2, dtype=torch.float).scatter_(0, torch.tensor(y), value=1)) # one-hot encoding
+#     )
+
+
+#     device = "cuda" if torch.cuda.is_available() else "cpu"
+#     # memristive deep neural decoder
+#     analog_model = MDND(
+#         input_size=INPUT_SIZE,
+#         hidden_size=HIDDEN_SIZE,
+#         output_size=OUTPUT_SIZE,
+#         rpu_config=training_rpu_config
+#     ).to(device)
+#     # load weights (but use the current RPU config)
+#     analog_model.load_state_dict(torch.load(f'research/saves/fp-mdnd/{MDND_LOAD_PATH}'), load_rpu_config=False)
+#     # load probes
+#     analog_model.load_probes(probes)
+
+#     # analog optimizer
+#     optimizer = AnalogOptimizer(Adam, analog_model.parameters(), lr=LEARNING_RATE)
+#     optimizer.regroup_param_groups(analog_model)
+
+
+#     # hwa training
+#     trainer = Trainer(
+#         training_data=training_decode_data,
+#         test_data=test_decode_data,
+#         learning_rate=LEARNING_RATE,
+#         batch_size=BATCH_SIZE,
+#         epochs=EPOCHS,
+#         loss_fn=loss_fn,
+#         optimizer=optimizer,
+#         training_rpu_config=training_rpu_config,
+#         test_rpu_config=test_rpu_config,
+#         max_accuracy=True
+#     )
+#     # hwa-training
+#     trainer(analog_model, n_step=4)
+
+
+#     time = datetime.now()
+#     # save ha-mdnd
+#     torch.save(trainer.max_state_dict,
+#                f'research/saves/hhwa-mdnd/hhwa_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}_pdrop{pdrop:.3f}-{time}.pth')
+#     # save hwa training parameters
+#     with open(f'research/saves/hhwa-mdnd/hhwa_mdnd_model_d3_{pfr}_nU{HIDDEN_SIZE}_pdrop{pdrop:.3f}-{time}.json', 'w') as file:
+#         file.write(json.dumps(trainer.training_state_dict()))
+
+##########
+# TRAIN FOR DIFFERENT PFR @ PDROP = 0.1
+
+pdrop = 0.1
+
+for DATA_PATH in DATA_PATHS[:-1]: # iterate for different pfr
 
     # probes with given defective device probability
     probes = get_probes(pdrop)
