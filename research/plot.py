@@ -217,7 +217,7 @@ def pdrop_plot():
 
 def weight_distribution_plot():
 
-    MDND_LOAD_PATH = 'research/saves/hwa-mdnd/hwa_trained_mdnd_model_d3_p01_nU16_pdrop0.000-2022-07-13 04:48:07.121802.pth'
+    MDND_LOAD_PATH = 'research/saves/hhwa-mdnd/hhwa_mdnd_model_d3_p01_nU16_pdrop0.100-2022-07-19 14:37:58.964200.pth'
 
     # resistive processing unit
     rpu_config = InferenceRPUConfig()
@@ -241,19 +241,19 @@ def weight_distribution_plot():
     fig, ax = plt.subplots()
     ax.hist(weights, bins=20, density=True, histtype='bar',
             color='black')
-    ax.axvline(-std, color="r", linestyle="--", label=r"$\sigma$")
-    ax.axvline(std, color="r", linestyle="--")
-    ax.axvline(-2*std, color="g", linestyle="--", label=r"2$\sigma$")
-    ax.axvline(2*std, color="g", linestyle="--")
-    ax.axvline(-3*std, color="b", linestyle="--", label=r"3$\sigma$")
-    ax.axvline(3*std, color="b", linestyle="--")
+    ax.axvline(-2.5*std, color="r", linestyle="--", label=r"2.5$\sigma$")
+    ax.axvline(2.5*std, color="r", linestyle="--")
+    # ax.axvline(-2*std, color="g", linestyle="--", label=r"2$\sigma$")
+    # ax.axvline(2*std, color="g", linestyle="--")
+    # ax.axvline(-3*std, color="b", linestyle="--", label=r"3$\sigma$")
+    # ax.axvline(3*std, color="b", linestyle="--")
 
     ax.set_xlabel('Weight value [-]')
     ax.set_ylabel('Normalized counts [-]')
-    ax.tick_params(direction='in')
+    ax.tick_params(direction='in', which='both', top=True, right=True)
     ax.legend()
 
-    plt.show()
+    plt.savefig('research/plots/hwa_weight_distribution.pdf')
 
 def weight_clip_plot():
 
@@ -338,60 +338,6 @@ def weight_clip_plot():
 
     plt.savefig('research/plots/weight_clip.pdf')
 
-def training_noise_plot():
-
-    df = pd.read_pickle('research/experiments/results/training_noise.pkl')
-    std_dev = df.index.to_numpy()*100
-
-    decoder_performance = pd.read_pickle('research/experiments/results/decoder_performance.pkl')
-    baseline = decoder_performance["baseline", "mean"]
-    fp_mdnd = decoder_performance["fp-mdnd", "mean"]
-
-    fig, ax = plt.subplots()
-
-    ax.axhline(baseline[1.0]*100, color='k', linestyle='--')
-    ax.axhline(fp_mdnd[1.0]*100, color='k', linestyle=':')
-    ax.annotate(f'Baseline: {baseline[1.0]*100:>.2f}%\n'
-                f'FP-MDND: {fp_mdnd[1.0]*100:>.2f}%\n'
-                r'$p = 1.00\%$',
-                xy=(.45, .5), xycoords='axes fraction')
-    mean, std = df["p01", "mean"].to_numpy()*100, df["p01", "std"].to_numpy()*100     
-    ax.plot(std_dev, mean, color='purple')
-    ax.fill_between(std_dev, mean-std, mean+std, facecolor='violet', alpha=0.3)
-
-    ax.set_xlabel('Relative training noise [%]')
-    ax.set_ylabel('Decoder test accuracy [%]')
-    ax.tick_params(direction='in')
-
-    plt.show()
-
-def training_pdrop_plot():
-
-    df = pd.read_pickle('research/experiments/results/training_pdrop.pkl')
-    pdrop = df.index.to_numpy()
-
-    decoder_performance = pd.read_pickle('research/experiments/results/decoder_performance.pkl')
-    baseline = decoder_performance["baseline", "mean"]
-    fp_mdnd = decoder_performance["fp-mdnd", "mean"]
-
-    fig, ax = plt.subplots()
-
-    ax.axhline(baseline[1.0]*100, color='k', linestyle='--')
-    ax.axhline(fp_mdnd[1.0]*100, color='k', linestyle=':')
-    ax.annotate(f'Baseline: {baseline[1.0]*100:>.2f}%\n'
-                f'FP-MDND: {fp_mdnd[1.0]*100:>.2f}%\n'
-                r'$p = 1.00\%$',
-                xy=(.45, .5), xycoords='axes fraction')
-    mean, std = df["p01", "mean"].to_numpy()*100, df["p01", "std"].to_numpy()*100     
-    ax.plot(pdrop, mean, color='red')
-    ax.fill_between(pdrop, mean-std, mean+std, facecolor='red', alpha=0.2)
-
-    ax.set_xlabel('Training drop connections [-]')
-    ax.set_ylabel('Decoder test accuracy [%]')
-    ax.tick_params(direction='in')
-
-    plt.savefig('research/plots/training_pdrop_plot1.pdf')
-
 def weight_hwaclip_plot():
     
     MDND_LOAD_PATHS = [
@@ -474,7 +420,7 @@ def weight_hwaclip_plot():
 
 def conductances_plot():
     
-    MDND_LOAD_PATH = 'research/saves/fp-mdnd/fp_trained_mdnd_model_d3_p01_nU16_nR3-2022-07-11 12:25:29.338821.pth'
+    MDND_LOAD_PATH = 'research/saves/hhwa-mdnd/hhwa_mdnd_model_d3_p01_nU16_pdrop0.100-2022-07-19 14:37:58.964200.pth'
 
     # model parameters
     INPUT_SIZE = 4
@@ -519,7 +465,7 @@ def conductances_plot():
     axs[1].set_xlabel(r'$j$')
     cbar1.set_label(r'$g_{ij}^{-}$ [$\mu$S]')
 
-    plt.savefig('research/plots/fp-conductances.pdf')
+    plt.savefig('research/plots/hwa_conductances.pdf')
 
 def hwa_lr_losses_plot():
 
@@ -549,22 +495,23 @@ def hwa_inference_pdrop_plot():
     fig, ax = plt.subplots()
 
     ax.axhline(baseline[1.0]*100, color='k', linestyle='--')
-    ax.annotate(f'Baseline: {baseline[1.0]*100:>.2f}%\n',
+    ax.annotate(f'Baseline: {baseline[1.0]*100:>.2f}%\n'
                 r'$p = 1.00\%$',
-                xy=(.45, .5), xycoords='axes fraction')
-    
-    for training_pdrop in df:
+                xy=(.05, .5), xycoords='axes fraction')
+
+    for training_pdrop, _ in df.columns[::2]:
         mean = df[training_pdrop, "mean"].to_numpy()*100
         std = df[training_pdrop, "std"].to_numpy()*100 
-        training_pdrop = float(training_pdrop[-5:-2])*100
+        training_pdrop = float(training_pdrop[-5:-1])*100
         ax.errorbar(test_pdrops, mean, yerr=std, marker='s',
-                    label=f'pdrop = {training_pdrop:.0f}%')    
+                    label=f'$p_{{drop}}$ = {training_pdrop:.0f}%')    
 
     ax.set_xlabel('Defective device probability [%]')
     ax.set_ylabel('Decoder test accuracy [%]')
-    ax.tick_params(direction='in')
+    ax.tick_params(direction='in', which='both', top=True, right=True)
+    ax.legend(frameon=False)
 
-    plt.show()
+    plt.savefig('research/plots/hwa_inference_pdrop.pdf')
 
 def hwa_inference_optimal_pdrop_plot():
 
@@ -577,21 +524,23 @@ def hwa_inference_optimal_pdrop_plot():
     fig, ax = plt.subplots()
 
     ax.axhline(baseline[1.0]*100, color='k', linestyle='--')
-    ax.annotate(f'Baseline: {baseline[1.0]*100:>.2f}%\n',
+    ax.annotate(f'Baseline: {baseline[1.0]*100:>.2f}%\n'
                 r'$p = 1.00\%$',
-                xy=(.45, .5), xycoords='axes fraction')
+                xy=(.05, .3), xycoords='axes fraction')
     
-    for training_scheme in df:
+    for (training_scheme, _), c in zip(df.columns[::2], ['tab:blue', 'tab:orange', 'tab:green']):
         mean = df[training_scheme, "mean"].to_numpy()*100
         std = df[training_scheme, "std"].to_numpy()*100
-        ax.errorbar(test_pdrops, mean, yerr=std, marker='s',
-                    label=training_scheme.upper())
+        ax.plot(test_pdrops, mean, marker='s', color=c,
+                label=training_scheme.upper())
+        ax.fill_between(test_pdrops, mean-std, mean+std, color=c, alpha=0.2)
 
     ax.set_xlabel('Defective device probability [%]')
     ax.set_ylabel('Decoder test accuracy [%]')
-    ax.tick_params(direction='in')
+    ax.tick_params(direction='in', which='both', top=True, right=True)
+    ax.legend(frameon=False)
 
-    plt.show()
+    plt.savefig('research/plots/hwa_inference_optimal_pdrop.pdf')
 
 def decoder_performance_plot():
 
@@ -612,9 +561,9 @@ def decoder_performance_plot():
 
     ax.plot(pfr, 100-naive, marker='s', linestyle='', c='b')
     ax.plot(pfr_linspace, monomial(pfr_linspace, *naive_popt), linestyle='-', c='b',
-            label=f'Naive decoder: ${{{naive_popt[0]:.2f}}}*p^{{{naive_popt[1]:.2f}}}$')
+            label=f'Naive decoder: ${{{naive_popt[0]:.2f}}}\,p^{{{naive_popt[1]:.2f}}}$')
 
-    for training_scheme, c in zip(df, ['g', 'r', 'c', 'm', 'y']):
+    for (training_scheme, _), c in zip(df.columns[::2], ['g', 'r', 'c', 'm', 'y']):
         label = "Baseline" if training_scheme == "baseline" else training_scheme.upper()
         mean = df[training_scheme, "mean"].to_numpy()*100
         std = df[training_scheme, "std"].to_numpy()*100
@@ -622,14 +571,14 @@ def decoder_performance_plot():
 
         ax.errorbar(pfr, 100-mean, yerr=std, marker='s', linestyle='', c=c)
         ax.plot(pfr_linspace, monomial(pfr_linspace, *popt), linestyle='-', c=c,
-            label=f'{label}: ${{{popt[0]:.2f}}}*p^{{{popt[1]:.2f}}}$')
+            label=f'{label}: ${{{popt[0]:.2f}}}\,p^{{{popt[1]:.2f}}}$')
 
     ax.set_xlabel('Physical fault rate [%]')
     ax.set_ylabel('Logical fault rate [%]')
-    ax.tick_params(direction='in', which='both')
-    ax.legend()
+    ax.tick_params(direction='in', which='both', top=True, right=True)
+    ax.legend(frameon=False)
 
-    plt.show()
+    plt.savefig('research/plots/decoder_performance.pdf')
 
 def performance_histogram_plot():
 
@@ -642,25 +591,27 @@ def performance_histogram_plot():
     fig, ax = plt.subplots()
 
     b1 = ax.bar([0, 1],
-                [df_naive["naive"][0.1]*100, df["baseline", "mean"][0.1]*100],
-                yerr=[0, df["baseline", "std"][0.1]*100],
+                [df_naive["naive"][1.0]*100, df["baseline", "mean"][1.0]*100],
+                yerr=[0, df["baseline", "std"][1.0]*100],
                 color='black',
                 label='Digital')
-    ax.bar_label(b1, label_type='center', color='white')
+    ax.bar_label(b1, label_type='edge', padding=-50., color='white')
 
     b2 = ax.bar([2, 3, 4],
-                [df["fp-mdnd", "mean"][0.1]*100, df["hwa-mdnd", "mean"][0.1]*100, df["hhwa-mdnd", "mean"][0.1]*100],
-                yerr=[df["fp-mdnd", "std"][0.1]*100, df["hwa-mdnd", "std"][0.1]*100, df["hhwa-mdnd", "std"][0.1]*100],
+                [df["fp-mdnd", "mean"][1.0]*100, df["hwa-mdnd", "mean"][1.0]*100, df["hhwa-mdnd", "mean"][1.0]*100],
+                yerr=[df["fp-mdnd", "std"][1.0]*100, df["hwa-mdnd", "std"][1.0]*100, df["hhwa-mdnd", "std"][1.0]*100],
                 color='darkred',
                 label='Analog')
-    ax.bar_label(b2, label_type='center', color='white')
+    ax.bar_label(b2, label_type='edge', padding=-50., color='white')
 
     ax.set_xticks(ind, labels=['Naive', 'Baseline', 'FP-MDND', 'HWA-MDND', 'HHWA-MDND'])
     ax.set_xlabel('Decoder')
     ax.set_ylabel('Decoder test accuracy [%]')
-    ax.legend()
+    ax.set_ylim(bottom=70.)
+    ax.tick_params(direction='in', which='both', top=True, right=True)
+    ax.legend(frameon=False)
 
-    plt.show()
+    plt.savefig('research/plots/performance_histogram.pdf')
 
 # dac_adc_resolution_plot()
 # prog_noise_scale_plot()
@@ -671,9 +622,11 @@ def performance_histogram_plot():
 
 # conductances_plot()
 
-# training_noise_plot()
-hwa_inference_pdrop_plot()
+# hwa_inference_pdrop_plot()
+# hwa_inference_optimal_pdrop_plot()
 
-# weight_distribution_plot()
+# decoder_performance_plot()
+# performance_histogram_plot()
 
-# hwa_lr_losses_plot()
+weight_distribution_plot()
+conductances_plot()

@@ -106,7 +106,7 @@ test_rpu_config.modifier = WeightModifierParameter(enable_during_test=True)
 DATA_PATH = DATA_PATHS[-1]
 
 for pdrop in np.linspace(0.0, 0.1, 6): # iterate for different pdrop
-
+    pdrop = 0.1
     # probes with given defective device probability
     probes = get_probes(pdrop)
 

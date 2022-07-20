@@ -36,7 +36,7 @@ DATA_PATHS = [
     'research/1QBit/test_data_d3/surfaceCodeRMX_d3_p01_Nt1M_rnnData_aT1651079378.txt'
 ]
 
-LOAD_PATH = 'research/saves/hhwa-mdnd/hhwa_mdnd_model_d3_p01_nU16_pdrop0.100-2022-07-19 11:03:18.236597.pth'
+LOAD_PATH = 'research/saves/hhwa-mdnd/hhwa_mdnd_model_d3_p01_nU16_pdrop0.100-2022-07-19 14:37:58.964200.pth'
 
 # model parameters
 INPUT_SIZE = 4
