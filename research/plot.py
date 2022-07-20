@@ -631,6 +631,37 @@ def decoder_performance_plot():
 
     plt.show()
 
+def performance_histogram_plot():
+
+    df = pd.read_pickle('research/experiments/results/decoder_performance.pkl')
+    df_naive = pd.read_pickle('research/experiments/results/naive_performance.pkl')
+
+    N = 5
+    ind = np.arange(N)
+
+    fig, ax = plt.subplots()
+
+    b1 = ax.bar([0, 1],
+                [df_naive["naive"][0.1]*100, df["baseline", "mean"][0.1]*100],
+                yerr=[0, df["baseline", "std"][0.1]*100],
+                color='black',
+                label='Digital')
+    ax.bar_label(b1, label_type='center', color='white')
+
+    b2 = ax.bar([2, 3, 4],
+                [df["fp-mdnd", "mean"][0.1]*100, df["hwa-mdnd", "mean"][0.1]*100, df["hhwa-mdnd", "mean"][0.1]*100],
+                yerr=[df["fp-mdnd", "std"][0.1]*100, df["hwa-mdnd", "std"][0.1]*100, df["hhwa-mdnd", "std"][0.1]*100],
+                color='darkred',
+                label='Analog')
+    ax.bar_label(b2, label_type='center', color='white')
+
+    ax.set_xticks(ind, labels=['Naive', 'Baseline', 'FP-MDND', 'HWA-MDND', 'HHWA-MDND'])
+    ax.set_xlabel('Decoder')
+    ax.set_ylabel('Decoder test accuracy [%]')
+    ax.legend()
+
+    plt.show()
+
 # dac_adc_resolution_plot()
 # prog_noise_scale_plot()
 # pdrop_plot()
