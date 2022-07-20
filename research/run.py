@@ -10,5 +10,6 @@ from experiments import (
 # decoder_performance_run()
 
 # training_noise_run()
-inference_pdrop_run()
-inference_optimal_pdrop_run()
+# inference_pdrop_run()
+# inference_optimal_pdrop_run()
+decoder_performance_run()
